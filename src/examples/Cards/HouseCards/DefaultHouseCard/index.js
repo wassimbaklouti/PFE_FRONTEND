@@ -23,59 +23,7 @@ function DefaultProjectCard({
   handymanUsername,
   userUsername,
 }) {
-  const [rating, setRating] = useState(0); // Overall rating
-  const [userRating, setUserRating] = useState(0); // User's rating
-  const [connectedUser, setConnectedUser] = useState(null);
-  const [showRatingSection, setShowRatingSection] = useState(false); // To toggle the rating section
-
-  // Function to submit or update the rating
-  const submitRating = async (newRating) => {
-    try {
-      if (userRating) {
-        await axios.put("/PI/ratings/update", {
-          username: connectedUser.username,
-          handymanUsername: handymanUsername,
-          rate: newRating,
-        });
-      } else {
-        await axios.post("/PI/ratings/add", {
-          username: connectedUser.username,
-          handymanUsername: handymanUsername,
-          rate: newRating,
-        });
-      }
-      setUserRating(newRating);
-    } catch (error) {
-      console.error("Error submitting rating:", error);
-    }
-  };
-
-  // Function to delete the rating
-  const deleteRating = async () => {
-    try {
-      await axios.delete("/PI/ratings/delete", {
-        data: {
-          username: connectedUser.username,
-          handymanUsername: handymanUsername,
-        },
-      });
-      setUserRating(0); // Reset the user's rating to 0
-    } catch (error) {
-      console.error("Error deleting rating:", error);
-    }
-  };
-
-  // Function to fetch the overall rating of the handyman
-  const fetchOverallRating = async () => {
-    try {
-      const response = await axios.get(`/PI/ratings/overall?handymanUsername=${handymanUsername}`);
-      if (response.status === 200) {
-        setRating(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching overall rating:", error);
-    }
-  };
+  const [connectedUser, setConnectedUser] = useState(null); // To toggle the rating section
 
   // Function to fetch the connected user
   const fetchConnectedUser = async () => {
@@ -111,7 +59,6 @@ function DefaultProjectCard({
 
   useEffect(() => {
     fetchConnectedUser();
-    fetchOverallRating(); // Fetch overall rating when component mounts
   }, [handymanUsername]);
 
   const renderAuthors = authors.map(({ image: media, name }) => (
@@ -142,7 +89,7 @@ function DefaultProjectCard({
         backgroundColor: "transparent",
         boxShadow: "none",
         overflow: "visible",
-        width: "120%",
+        width: "100%",
       }}
     >
       <MDBox position="relative" width="100.25%" shadow="xl" borderRadius="xl">
@@ -191,50 +138,6 @@ function DefaultProjectCard({
             {description}
           </MDTypography>
         </MDBox>
-
-        {/* Overall rating display */}
-        <MDBox mb={3} display="flex" alignItems="center">
-          <MDTypography variant="button" fontWeight="regular" color="text">
-            Overall Rating : {rating}/5
-          </MDTypography>
-        </MDBox>
-
-        {/* Toggle rating section */}
-        {showRatingSection && (
-          <>
-            {/* User rating system */}
-            <MDBox mb={3} display="flex" alignItems="center">
-              <MDTypography variant="button" fontWeight="regular" color="text">
-                Your Rating:
-              </MDTypography>
-              <Rating
-                name="handyman-rating"
-                value={userRating} // Show the user's rating
-                onChange={(event, newValue) => submitRating(newValue)} // Update rating when changed
-                max={5}
-                size="medium"
-                sx={{ ml: 1 }}
-              />
-            </MDBox>
-
-            {/* Clear rating button */}
-            <MDButton variant="outlined" size="small" color="error" onClick={deleteRating}>
-              Clear Rating
-            </MDButton>
-          </>
-        )}
-
-        {/* Rate Handyman button */}
-        {!showRatingSection && (
-          <MDButton
-            variant="outlined"
-            size="small"
-            color="primary"
-            onClick={() => setShowRatingSection(true)}
-          >
-            Rate Handyman
-          </MDButton>
-        )}
 
         <MDBox display="flex" justifyContent="space-between" alignItems="center">
           <MDBox display="flex">{renderAuthors}</MDBox>

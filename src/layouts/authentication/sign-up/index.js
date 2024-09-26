@@ -215,9 +215,16 @@ function Cover() {
                     onChange={(e) => setExpertise(e.target.value)}
                     value={expertise}
                   >
-                    <MenuItem value="Plumber">Plumber</MenuItem>
-                    <MenuItem value="Electrician">Electrician</MenuItem>
-                    <MenuItem value="Gardener">Gardener</MenuItem>
+                    <MenuItem value="plumber">Plumber</MenuItem>
+                    <MenuItem value="electrician">Electrician</MenuItem>
+                    <MenuItem value="gardner">Gardener</MenuItem>
+                    <MenuItem value="houseKeeper">HouseKeeper</MenuItem>
+                    <MenuItem value="refrigerationTechnician">refrigerationTechnician</MenuItem>
+                    <MenuItem value="homeApplianceTechnician">homeApplianceTechnician</MenuItem>
+                    <MenuItem value="mason">mason</MenuItem>
+                    <MenuItem value="carpenter">carpenter</MenuItem>
+                    <MenuItem value="painter">painter</MenuItem>
+                    <MenuItem value="welder">welder</MenuItem>
                   </Select>
                 </FormControl>
               </MDBox>

@@ -16,15 +16,12 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import ProfileInfoCard from "examples/Cards/InfoCards/ProfileInfoCard";
-import ProfilesList from "examples/Lists/ProfilesList";
-import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
+import PostCard from "examples/Cards/PostCards/PostCard"; // Make sure to create this component
+import BuildingCard from "examples/Cards/BuildingCards/BuildingCard"; // Make sure to create this component
 
 // Overview page components
 import Header from "layouts/profile/components/Header";
 import PlatformSettings from "layouts/profile/components/PlatformSettings";
-
-// Data
-import profilesListData from "layouts/profile/data/profilesListData";
 
 // Images
 import homeDecor1 from "assets/images/home-decor-1.jpg";
@@ -54,7 +51,29 @@ function Overview() {
     currentUsername: "",
   });
   const [cities, setCities] = useState([]);
-  const [cityOptions, setCityOptions] = useState([]);
+  const [newPostData, setNewPostData] = useState({
+    title: "",
+    content: "",
+    imageFile: null,
+  });
+  const [newBuildingData, setNewBuildingData] = useState({
+    type: "",
+    address: "",
+    rooms: "",
+    price: "",
+    area: "",
+    owner: {
+      userId: "",
+      firstName: "",
+      lastName: "",
+      username: "",
+      email: "",
+    },
+  });
+
+  const [posts, setPosts] = useState([]);
+  const [buildings, setBuildings] = useState([]);
+  const [activeForm, setActiveForm] = useState(null); // To toggle between post and building form
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -71,11 +90,8 @@ function Overview() {
             },
           });
 
-          console.log("Profile fetch response:", response); // Debug: Check response
-
           if (response.ok) {
             const data = await response.json();
-            console.log("Profile data:", data); // Debug: Check profile data
             setProfile(data);
             setFormData({
               firstName: data.firstName || "",
@@ -90,6 +106,40 @@ function Overview() {
               role: data.role || "",
               currentUsername: data.username || "",
             });
+
+            // Fetch posts
+            const postsResponse = await fetch(`/PI/api/posts/user/${data.username}`, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (postsResponse.ok) {
+              const postsData = await postsResponse.json();
+              setPosts(postsData);
+            } else {
+              console.error("Failed to fetch posts");
+            }
+
+            // Fetch buildings
+            const buildingsResponse = await fetch(
+              `/PI/api/buildings/owner/username/${data.username}`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            if (buildingsResponse.ok) {
+              const buildingsData = await buildingsResponse.json();
+              setBuildings(buildingsData);
+            } else {
+              console.error("Failed to fetch buildings");
+            }
           } else {
             console.error("Failed to fetch profile");
           }
@@ -102,7 +152,6 @@ function Overview() {
 
       setLoading(false);
     };
-
     const fetchCities = async () => {
       try {
         const response = await fetch(
@@ -167,7 +216,6 @@ function Overview() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Update success:", data); // Debug: Check update response
           setProfile(data);
           setEditMode(false); // Exit edit mode after successful update
         } else {
@@ -181,210 +229,411 @@ function Overview() {
     }
   };
 
-  if (loading) {
-    return <MDTypography variant="h6">Loading...</MDTypography>;
-  }
+  const handleNewPostChange = (e) => {
+    const { name, value } = e.target;
+    setNewPostData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
-  if (!profile) {
-    return <MDTypography variant="h6">No profile data available</MDTypography>;
-  }
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    setNewPostData((prevData) => ({
+      ...prevData,
+      imageFile: file, // Store the selected file
+    }));
+  };
+
+  const handleNewPostSubmit = async (e) => {
+    e.preventDefault();
+    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+
+    if (token && profile) {
+      const formData = new FormData();
+      formData.append("username", profile.username); // Pass the connected username
+      formData.append("title", newPostData.title);
+      formData.append("content", newPostData.content);
+
+      if (newPostData.imageFile) {
+        formData.append("imageFile", newPostData.imageFile); // Append the image file to the form data
+      }
+
+      try {
+        const response = await fetch("/PI/api/posts/create", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData, // Send the form data, including the file
+        });
+
+        if (response.ok) {
+          console.log("New post added successfully");
+          // Reset the form fields
+          setNewPostData({
+            title: "",
+            content: "",
+            imageFile: null,
+          });
+          // Refetch posts
+          const postsResponse = await fetch(`/PI/api/posts/user/${profile.username}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (postsResponse.ok) {
+            const postsData = await postsResponse.json();
+            setPosts(postsData);
+          }
+        } else {
+          console.error("Failed to add new post");
+        }
+      } catch (error) {
+        console.error("Error adding new post:", error);
+      }
+    } else {
+      console.warn("No token found in localStorage or profile not available");
+    }
+  };
+
+  // New function to handle the building form
+  const handleNewBuildingChange = (e) => {
+    const { name, value } = e.target;
+    setNewBuildingData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleNewBuildingSubmit = async (e) => {
+    e.preventDefault();
+    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    if (token && profile) {
+      // Construire un objet JavaScript avec les données du bâtiment, y compris les champs supplémentaires
+      const buildingData = {
+        type: newBuildingData.type,
+        address: newBuildingData.address,
+        rooms: newBuildingData.rooms,
+        price: newBuildingData.price,
+        area: newBuildingData.area, // Par exemple, 150.0
+        owner: {
+          userId: profile.userId, // Utiliser l'ID de l'utilisateur connecté
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          username: profile.username,
+          email: profile.email,
+        },
+      };
+
+      try {
+        const response = await fetch("/PI/api/buildings/create", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Spécifier que le type de contenu est JSON
+          },
+          body: JSON.stringify(buildingData), // Convertir l'objet en JSON
+        });
+
+        if (response.ok) {
+          console.log("New building added successfully");
+          // Réinitialiser les champs du formulaire après succès
+          setNewBuildingData({
+            type: "",
+            address: "",
+            rooms: "",
+            price: "",
+            area: "",
+            owner: {
+              userId: "",
+              firstName: "",
+              lastName: "",
+              username: "",
+              email: "",
+            },
+          });
+          // Logique supplémentaire pour gérer la réussite si nécessaire
+        } else {
+          console.error("Failed to add new building");
+        }
+      } catch (error) {
+        console.error("Error adding new building:", error);
+      }
+    } else {
+      console.warn("No token found in localStorage or profile not available");
+    }
+  };
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {/* <DashboardNavbar /> */}
       <MDBox mb={2} />
-      <Header>
-        <MDBox mt={5} mb={3}>
-          <Grid container spacing={1}>
-            <Grid item xs={12} md={6} xl={4}>
-              <PlatformSettings />
-            </Grid>
-            <Grid item xs={12} md={6} xl={4} sx={{ display: "flex" }}>
-              <Divider orientation="vertical" sx={{ ml: -2, mr: 1 }} />
-              {!editMode ? (
-                <ProfileInfoCard
-                  title="Profile Information"
-                  description={`UID : ${profile.userId}` || "No UID"}
-                  info={{
-                    FirstName: profile.firstName || "No FirstName",
-                    LastName: profile.lastName || "No LastName",
-                    UserName: profile.username || "No UserName",
-                    email: profile.email || "No Email",
-                    PhoneNumber: profile.phoneNumber || "No Phone Number",
-                    City: profile.city || "No City",
-                  }}
-                  // social={profile.socialLinks || []}
-                  action={{ route: "", tooltip: "Edit Profile", onClick: handleEdit }}
-                  shadow={false}
-                />
-              ) : (
-                <MDBox component="form" onSubmit={handleSubmit}>
-                  <TextField
-                    label="First Name"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
+      {loading ? (
+        <MDTypography variant="h6">Loading...</MDTypography>
+      ) : (
+        <>
+          <Header profile={profile} />
+          <MDBox mt={5} mb={3}>
+            <Grid container spacing={1}>
+              <Grid item xs={12} md={6} xl={4}>
+                <PlatformSettings />
+              </Grid>
+              <Grid item xs={12} md={6} xl={4} sx={{ display: "flex" }}>
+                <Divider orientation="vertical" sx={{ ml: -2, mr: 1 }} />
+                {!editMode ? (
+                  <ProfileInfoCard
+                    title="Profile Information"
+                    info={{
+                      FirstName: profile.firstName || "No FirstName",
+                      LastName: profile.lastName || "No LastName",
+                      UserName: profile.username || "No UserName",
+                      email: profile.email || "No Email",
+                      PhoneNumber: profile.phoneNumber || "No Phone Number",
+                      City: profile.city || "No City",
+                    }}
+                    action={{ route: "", tooltip: "Edit Profile", onClick: handleEdit }}
                   />
-                  <TextField
-                    label="Last Name"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="User Name"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Phone Number"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <Autocomplete
-                    options={cities}
-                    value={formData.city}
-                    onChange={handleCityChange}
-                    renderInput={(params) => (
-                      <TextField {...params} label="City" margin="normal" fullWidth />
-                    )}
-                  />
-                  <MDBox mt={2} display="flex" justifyContent="space-between">
-                    <Button type="submit" variant="gradient" color="info">
-                      Save Changes
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="gradient"
-                      color="error"
-                      onClick={() => setEditMode(false)}
-                    >
-                      Cancel
+                ) : (
+                  <MDBox component="form" onSubmit={handleSubmit}>
+                    <MDTypography variant="h6">Edit Profile</MDTypography>
+                    <TextField
+                      label="Username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Phone Number"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <Autocomplete
+                      options={cities}
+                      getOptionLabel={(option) => option}
+                      value={formData.city}
+                      onChange={handleCityChange}
+                      renderInput={(params) => (
+                        <TextField {...params} label="City" fullWidth margin="normal" />
+                      )}
+                    />
+                    <Button type="submit" variant="contained" color="primary" fullWidth>
+                      Save
                     </Button>
                   </MDBox>
-                </MDBox>
-              )}
-              <Divider orientation="vertical" sx={{ mx: 0 }} />
+                )}
+              </Grid>
+
+              <Grid item xs={12} xl={4}>
+                {/* Display Add Post and Add Building buttons only for Property Owners */}
+                {profile.role === "ROLE_PROPERTYOWNER" && (
+                  <MDBox mb={2}>
+                    <Button
+                      variant={activeForm === "post" ? "contained" : "outlined"}
+                      color="primary"
+                      onClick={() => setActiveForm("post")}
+                      sx={{ mr: 2 }}
+                    >
+                      Add New Post
+                    </Button>
+                    <Button
+                      variant={activeForm === "building" ? "contained" : "outlined"}
+                      color="secondary"
+                      onClick={() => setActiveForm("building")}
+                    >
+                      Add New Building
+                    </Button>
+                  </MDBox>
+                )}
+                {profile.role !== "ROLE_PROPERTYOWNER" && (
+                  <MDBox component="form" onSubmit={handleNewPostSubmit}>
+                    <MDTypography variant="h6">Add New Post</MDTypography>
+                    <TextField
+                      label="Title"
+                      name="title"
+                      value={newPostData.title}
+                      onChange={handleNewPostChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Content"
+                      name="content"
+                      value={newPostData.content}
+                      onChange={handleNewPostChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <input
+                      accept="image/*"
+                      type="file"
+                      onChange={handleImageFileChange}
+                      style={{ margin: "16px 0" }} // Add some margin for better layout
+                    />
+                    <Button type="submit" variant="contained" color="primary" fullWidth>
+                      Add Post
+                    </Button>
+                  </MDBox>
+                )}
+
+                {/* Conditional rendering of forms based on activeForm */}
+                {activeForm === "post" && (
+                  <MDBox component="form" onSubmit={handleNewPostSubmit}>
+                    <MDTypography variant="h6">Add New Post</MDTypography>
+                    <TextField
+                      label="Title"
+                      name="title"
+                      value={newPostData.title}
+                      onChange={handleNewPostChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Content"
+                      name="content"
+                      value={newPostData.content}
+                      onChange={handleNewPostChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <input
+                      accept="image/*"
+                      type="file"
+                      onChange={handleImageFileChange}
+                      style={{ margin: "16px 0" }} // Add some margin for better layout
+                    />
+                    <Button type="submit" variant="contained" color="primary" fullWidth>
+                      Add Post
+                    </Button>
+                  </MDBox>
+                )}
+
+                {activeForm === "building" && (
+                  <MDBox component="form" onSubmit={handleNewBuildingSubmit}>
+                    <MDTypography variant="h6">Add New Building</MDTypography>
+                    <TextField
+                      label="Type"
+                      name="type"
+                      value={newBuildingData.type}
+                      onChange={handleNewBuildingChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Adress"
+                      name="address"
+                      value={newBuildingData.address}
+                      onChange={handleNewBuildingChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Rooms"
+                      name="rooms"
+                      value={newBuildingData.rooms}
+                      onChange={handleNewBuildingChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Price"
+                      name="price"
+                      value={newBuildingData.price}
+                      onChange={handleNewBuildingChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <TextField
+                      label="Area"
+                      name="area"
+                      value={newBuildingData.area}
+                      onChange={handleNewBuildingChange}
+                      fullWidth
+                      margin="normal"
+                    />
+                    <Button type="submit" variant="contained" color="secondary" fullWidth>
+                      Add Building
+                    </Button>
+                  </MDBox>
+                )}
+              </Grid>
             </Grid>
-            <Grid item xs={12} xl={4}>
-              <ProfilesList title="Conversations" profiles={profilesListData} shadow={false} />
-            </Grid>
-          </Grid>
-        </MDBox>
-        <MDBox pt={2} px={2} lineHeight={1.25}>
-          <MDTypography variant="h6" fontWeight="medium">
-            Projects
-          </MDTypography>
-          <MDBox mb={1}>
-            <MDTypography variant="button" color="text">
-              Architects design houses
-            </MDTypography>
           </MDBox>
-        </MDBox>
-        <MDBox p={2}>
-          <Grid container spacing={6}>
-            <Grid item xs={12} md={6} xl={3}>
-              <DefaultProjectCard
-                image={homeDecor1}
-                label="project #2"
-                title="modern"
-                description="As Uber works through a huge amount of internal management turmoil."
-                action={{
-                  type: "internal",
-                  route: "/pages/profile/profile-overview",
-                  color: "info",
-                  label: "view project",
-                }}
-                authors={[
-                  { image: team1, name: "Elena Morison" },
-                  { image: team2, name: "Ryan Milly" },
-                  { image: team3, name: "Nick Daniel" },
-                  { image: team4, name: "Peterson" },
-                ]}
-              />
+
+          <MDBox p={2}>
+            Posts Section
+            <Grid container spacing={6}>
+              {/* Posts Section */}
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <Grid item xs={12} md={6} xl={3} key={post.id}>
+                    <PostCard
+                      postId={post.id}
+                      image={homeDecor1}
+                      title={post.title}
+                      content={post.content}
+                      username={post.username}
+                      action={{
+                        type: "internal",
+                        route: `/posts/${post.id}`,
+                        color: "info",
+                        label: "View Post",
+                      }}
+                    />
+                  </Grid>
+                ))
+              ) : (
+                <MDTypography variant="h6" align="center" fullWidth>
+                  No posts available
+                </MDTypography>
+              )}
             </Grid>
-            <Grid item xs={12} md={6} xl={3}>
-              <DefaultProjectCard
-                image={homeDecor2}
-                label="project #1"
-                title="scandinavian"
-                description="Music is something that everyone has their own specific opinion about."
-                action={{
-                  type: "internal",
-                  route: "/pages/profile/profile-overview",
-                  color: "info",
-                  label: "view project",
-                }}
-                authors={[
-                  { image: team3, name: "Nick Daniel" },
-                  { image: team4, name: "Peterson" },
-                  { image: team1, name: "Elena Morison" },
-                  { image: team2, name: "Ryan Milly" },
-                ]}
-              />
+            <>
+              <br />
+            </>
+          </MDBox>
+          {/* Building section */}
+          <MDBox p={2}>
+            Buildings Section
+            <Grid container spacing={6}>
+              {buildings.length > 0 ? (
+                buildings.map((building) => (
+                  <Grid item xs={12} md={6} xl={3} key={building.id}>
+                    <BuildingCard
+                      buildingId={building.id}
+                      image={homeDecor1} // Replace with building image if available
+                      type={building.type}
+                      address={building.address}
+                      rooms={building.rooms}
+                      price={building.price}
+                      area={building.area}
+                      owner={building.owner}
+                    />
+                  </Grid>
+                ))
+              ) : (
+                <div>No buildings found.</div>
+              )}
             </Grid>
-            <Grid item xs={12} md={6} xl={3}>
-              <DefaultProjectCard
-                image={homeDecor3}
-                label="project #3"
-                title="minimalist"
-                description="Different people have different taste, and various types of music."
-                action={{
-                  type: "internal",
-                  route: "/pages/profile/profile-overview",
-                  color: "info",
-                  label: "view project",
-                }}
-                authors={[
-                  { image: team4, name: "Peterson" },
-                  { image: team3, name: "Nick Daniel" },
-                  { image: team2, name: "Ryan Milly" },
-                  { image: team1, name: "Elena Morison" },
-                ]}
-              />
-            </Grid>
-            <Grid item xs={12} md={6} xl={3}>
-              <DefaultProjectCard
-                image={homeDecor4}
-                label="project #4"
-                title="gothic"
-                description="Why would anyone pick blue over pink? Pink is obviously a better color."
-                action={{
-                  type: "internal",
-                  route: "/pages/profile/profile-overview",
-                  color: "info",
-                  label: "view project",
-                }}
-                authors={[
-                  { image: team4, name: "Peterson" },
-                  { image: team3, name: "Nick Daniel" },
-                  { image: team2, name: "Ryan Milly" },
-                  { image: team1, name: "Elena Morison" },
-                ]}
-              />
-            </Grid>
-          </Grid>
-        </MDBox>
-      </Header>
-      <Footer />
+          </MDBox>
+        </>
+      )}
     </DashboardLayout>
   );
 }

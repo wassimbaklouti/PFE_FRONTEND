@@ -37,11 +37,24 @@ Coded by www.creative-tim.com
 
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
+import Posts from "layouts/posts";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
+import Plumbers from "layouts/plumbers";
+import Gardners from "layouts/gardners";
+import HouseKeepers from "layouts/houseKeepers";
+import RefrigerationTechnicians from "layouts/refrigerationTechnicians";
+import HomeApplianceTechnicians from "layouts/homeApplianceTechnicians";
+import Painters from "layouts/painters";
+import BabySitters from "layouts/babySitters";
+import Carpenters from "layouts/carpenters";
+import Masons from "layouts/masons";
+import Welders from "layouts/welders";
+import Electricians from "layouts/electricians";
+import Houses from "layouts/houses";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 
@@ -83,7 +96,7 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Notifications",
+    name: "Payment",
     key: "notifications",
     icon: <Icon fontSize="small">notifications</Icon>,
     route: "/notifications",
@@ -99,11 +112,115 @@ const routes = [
   },
   {
     type: "collapse",
+    name: "Posts",
+    key: "Posts",
+    icon: <Icon fontSize="small">person</Icon>,
+    route: "/posts",
+    component: <Posts />,
+  },
+  {
+    type: "collapse",
     name: "Sign In",
     key: "sign-in",
     icon: <Icon fontSize="small">login</Icon>,
     route: "/authentication/sign-in",
     component: <SignIn />,
+  },
+  {
+    type: "",
+    name: "Gardners",
+    key: "Gardners",
+    icon: <Icon fontSize="small">yard</Icon>,
+    route: "/gardners",
+    component: <Gardners />,
+  },
+  {
+    type: "",
+    name: "Plumbers",
+    key: "plumbers",
+    icon: <Icon fontSize="small">plumbing</Icon>,
+    route: "/plumbers",
+    component: <Plumbers />,
+  },
+  {
+    type: "",
+    name: "Electricians",
+    key: "Electricians",
+    icon: <Icon fontSize="small">electric_bolt</Icon>,
+    route: "/electricians",
+    component: <Electricians />,
+  },
+  {
+    type: "",
+    name: "HouseKeepers",
+    key: "HouseKeepers",
+    icon: <Icon fontSize="small">electric_bolt</Icon>,
+    route: "/houseKeepers",
+    component: <HouseKeepers />,
+  },
+  {
+    type: "",
+    name: "RefrigerationTechnicians",
+    key: "RefrigerationTechnicians",
+    icon: <Icon fontSize="small">electric_bolt</Icon>,
+    route: "/refrigerationTechnicians",
+    component: <RefrigerationTechnicians />,
+  },
+  {
+    type: "",
+    name: "HomeApplianceTechnicians",
+    key: "HomeApplianceTechnicians",
+    icon: <Icon fontSize="small">local_laundry_service</Icon>,
+    route: "/homeApplianceTechnicians",
+    component: <HomeApplianceTechnicians />,
+  },
+  {
+    type: "",
+    name: "Painters",
+    key: "Painters",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/painters",
+    component: <Painters />,
+  },
+  {
+    type: "",
+    name: "BabySitters",
+    key: "BabySitters",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/babySitters",
+    component: <BabySitters />,
+  },
+  {
+    type: "",
+    name: "Carpenters",
+    key: "Carpenters",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/carpenters",
+    component: <Carpenters />,
+  },
+  {
+    type: "",
+    name: "Masons",
+    key: "Masons",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/masons",
+    component: <Masons />,
+  },
+  {
+    type: "",
+    name: "Welders",
+    key: "Welders",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/welders",
+    component: <Welders />,
+  },
+  {
+    type: "",
+    name: "Houses",
+    key: "Houses",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/houses",
+    component: <Houses />,
   },
   {
     type: "collapse",

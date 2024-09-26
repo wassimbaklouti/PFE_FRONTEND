@@ -9,6 +9,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
+import MenuItem from "@mui/material/MenuItem"; // Import MenuItem for select options
+import Select from "@mui/material/Select"; // Import Select for expertise field
+import InputLabel from "@mui/material/InputLabel"; // Import InputLabel for Select label
+import FormControl from "@mui/material/FormControl"; // Import FormControl for styling
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -117,7 +121,6 @@ function Tables() {
 
       if (response.ok) {
         const data = await response.json();
-        //setRows((prevRows) => [...prevRows, data]);
         openSuccessSB(); // Show success notification
         handleClose();
         window.location.reload();
@@ -136,6 +139,18 @@ function Tables() {
     { label: "User", value: "ROLE_USER" },
     { label: "Handyman", value: "ROLE_HANDYMAN" },
     { label: "Property Owner", value: "ROLE_PROPRETYOWNER" },
+  ];
+
+  const expertiseOptions = [
+    { label: "Plumber", value: "plumber" },
+    { label: "Electrician", value: "electrician" },
+    { label: "Gardener", value: "gardner" },
+    { label: "HouseKeeper", value: "houseKeeper" },
+    { label: "Refrigeration Technician", value: "refrigerationTechnician" },
+    { label: "Home Appliance Technician", value: "homeApplianceTechnician" },
+    { label: "Mason", value: "mason" },
+    { label: "Carpenter", value: "carpenter" },
+    { label: "Painter", value: "painter" },
   ];
 
   const renderSuccessSB = (
@@ -194,12 +209,12 @@ function Tables() {
           </Grid>
         </Grid>
       </MDBox>
-      <Footer />
+      {/* <Footer /> */}
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add New User</DialogTitle>
         <DialogContent>
-          {loading ? ( // Conditionally render loading indicator
+          {loading ? (
             <div
               style={{
                 display: "flex",
@@ -260,54 +275,64 @@ function Tables() {
                   <TextField {...params} label="Role" margin="dense" fullWidth />
                 )}
               />
-              {newUser.role === "ROLE_HANDYMAN" && ( // Afficher le champ expertise si le rôle est Handyman
-                <TextField
-                  margin="dense"
-                  name="expertise"
-                  label="Expertise"
-                  type="text"
-                  fullWidth
-                  value={newUser.expertise}
-                  onChange={handleChange}
-                />
+              {newUser.role === "ROLE_HANDYMAN" && (
+                <FormControl fullWidth margin="dense">
+                  <InputLabel id="expertise-label">Expertise</InputLabel>
+                  <Select
+                    labelId="expertise-label"
+                    id="expertise"
+                    name="expertise"
+                    value={newUser.expertise}
+                    onChange={handleChange}
+                    label="Expertise"
+                  >
+                    {expertiseOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
-              <TextField
-                margin="dense"
-                name="phoneNumber"
-                label="Phone Number"
-                type="text"
-                fullWidth
-                value={newUser.phoneNumber}
-                onChange={handleChange}
-              />
               <Autocomplete
-                freeSolo
                 options={cities}
-                value={newUser.city}
+                getOptionLabel={(option) => option}
+                value={newUser.city || null}
                 onChange={handleCityChange}
                 renderInput={(params) => (
                   <TextField {...params} label="City" margin="dense" fullWidth />
                 )}
               />
-              <input
-                type="file"
+              <TextField
+                margin="dense"
+                name="phoneNumber"
+                label="Phone Number"
+                type="tel"
+                fullWidth
+                value={newUser.phoneNumber}
+                onChange={handleChange}
+              />
+              <TextField
+                margin="dense"
                 name="profileImage"
+                label="Profile Image"
+                type="file"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
                 onChange={handleImageChange}
-                style={{ marginTop: 20 }}
               />
             </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary" disabled={loading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary" disabled={loading}>
-            Add
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={loading}>
+            Add User
           </Button>
         </DialogActions>
       </Dialog>
-
       {renderSuccessSB}
     </DashboardLayout>
   );
