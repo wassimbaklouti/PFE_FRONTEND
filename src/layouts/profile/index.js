@@ -75,6 +75,23 @@ function Overview() {
   const [buildings, setBuildings] = useState([]);
   const [activeForm, setActiveForm] = useState(null); // To toggle between post and building form
 
+  const fetchBuilding = async () => {
+    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    const buildingsResponse = await fetch(`/PI/api/buildings/owner/username/${profile.username}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (buildingsResponse.ok) {
+      const buildingsData = await buildingsResponse.json();
+      setBuildings(buildingsData);
+    } else {
+      console.error("Failed to fetch buildings");
+    }
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
@@ -124,22 +141,7 @@ function Overview() {
             }
 
             // Fetch buildings
-            const buildingsResponse = await fetch(
-              `/PI/api/buildings/owner/username/${data.username}`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            if (buildingsResponse.ok) {
-              const buildingsData = await buildingsResponse.json();
-              setBuildings(buildingsData);
-            } else {
-              console.error("Failed to fetch buildings");
-            }
+            fetchBuilding();
           } else {
             console.error("Failed to fetch profile");
           }
@@ -357,6 +359,7 @@ function Overview() {
             },
           });
           // Logique supplémentaire pour gérer la réussite si nécessaire
+          fetchBuilding();
         } else {
           console.error("Failed to add new building");
         }
