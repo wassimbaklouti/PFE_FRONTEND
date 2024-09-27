@@ -6,6 +6,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import PostCardFeed from "examples/Cards/PostCardFeed/PostCardFeed";
 import homeDecor1 from "assets/images/home-decor-1.jpg";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function formatDate(dateString) {
   const date = new Date(dateString);
@@ -21,6 +22,7 @@ function DashboardPosts() {
   const [posts, setPosts] = useState([]);
   const [likesData, setLikesData] = useState({});
   const [commentsData, setCommentsData] = useState({});
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -30,7 +32,7 @@ function DashboardPosts() {
         });
         if (response.ok) {
           const postsData = await response.json();
-          console.log("Posts fetched:", postsData); // Debugging: Check posts data
+          console.log("Posts fetched:", postsData);
           setPosts(postsData);
 
           // Fetch likes and comments for each post
@@ -43,10 +45,11 @@ function DashboardPosts() {
         }
       } catch (error) {
         console.error("Error fetching posts:", error);
+      } finally {
+        setLoading(false); // Set loading to false once the fetch completes
       }
     };
 
-    // Fetch likes for a specific post
     const fetchLikes = async (postId) => {
       try {
         const response = await fetch(`http://localhost:8089/PI/api/posts/likes/${postId}`, {
@@ -54,16 +57,14 @@ function DashboardPosts() {
         });
         if (response.ok) {
           const likes = await response.json();
-          console.log(`Likes for post ${postId}:`, likes); // Debugging: Check likes data
+          console.log(`Likes for post ${postId}:`, likes);
           setLikesData((prev) => ({ ...prev, [postId]: likes.length }));
-          console.log(`Likes data for post ${postId}:`, likes.length); // Assuming likes is an array
         }
       } catch (error) {
         console.error(`Error fetching likes for post ${postId}:`, error);
       }
     };
 
-    // Fetch comments for a specific post
     const fetchComments = async (postId) => {
       try {
         const response = await fetch(`http://localhost:8089/PI/api/posts/comments/${postId}`, {
@@ -71,8 +72,8 @@ function DashboardPosts() {
         });
         if (response.ok) {
           const comments = await response.json();
-          console.log(`Comments for post ${postId}:`, comments); // Debugging: Check comments data
-          setCommentsData((prev) => ({ ...prev, [postId]: comments })); // Assuming comments is an array
+          console.log(`Comments for post ${postId}:`, comments);
+          setCommentsData((prev) => ({ ...prev, [postId]: comments }));
         }
       } catch (error) {
         console.error(`Error fetching comments for post ${postId}:`, error);
@@ -86,36 +87,47 @@ function DashboardPosts() {
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox py={3}>
-        <MDTypography variant="h4">Posts Section</MDTypography>
-        <Grid container justifyContent="center">
-          <Grid item xs={12} md={8}>
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <PostCardFeed
-                  key={post.id}
-                  postId={post.id}
-                  image={post.imageUrl || homeDecor1}
-                  title={post.title}
-                  content={post.content}
-                  author={post.username}
-                  date={formatDate(post.date)}
-                  likes={likesData[post.id] || 0}
-                  comments={commentsData[post.id] || []}
-                  // action={{
-                  //   type: "internal",
-                  //   route: `/posts/${post.id}`,
-                  //   color: "info",
-                  //   label: "Voir le post",
-                  // }}
-                />
-              ))
-            ) : (
-              <MDTypography variant="h6" align="center" fullWidth>
-                Aucun post disponible
-              </MDTypography>
-            )}
-          </Grid>
-        </Grid>
+        {loading ? (
+          <MDBox
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="100vh"
+            width="100vw"
+            position="absolute"
+            top={0}
+            bgcolor="background.default"
+          >
+            <CircularProgress />
+          </MDBox>
+        ) : (
+          <>
+            <MDTypography variant="h4">Posts Section</MDTypography>
+            <Grid container justifyContent="center">
+              <Grid item xs={12} md={8}>
+                {posts.length > 0 ? (
+                  posts.map((post) => (
+                    <PostCardFeed
+                      key={post.id}
+                      postId={post.id}
+                      image={post.imageUrl || homeDecor1}
+                      title={post.title}
+                      content={post.content}
+                      author={post.username}
+                      date={formatDate(post.date)}
+                      likes={likesData[post.id] || 0}
+                      comments={commentsData[post.id] || []}
+                    />
+                  ))
+                ) : (
+                  <MDTypography variant="h6" align="center">
+                    No Post Available
+                  </MDTypography>
+                )}
+              </Grid>
+            </Grid>
+          </>
+        )}
       </MDBox>
     </DashboardLayout>
   );
