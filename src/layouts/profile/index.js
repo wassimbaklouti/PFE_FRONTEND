@@ -398,7 +398,7 @@ function Overview() {
 
   return (
     <DashboardLayout>
-      {/* <DashboardNavbar /> */}
+      <DashboardNavbar />
       <MDBox mb={2} />
       {loading ? (
         <MDBox
@@ -409,7 +409,7 @@ function Overview() {
           width="100vw" // Makes it take full width of the viewport
           position="absolute" // Ensures it takes up the whole page
           top={0}
-          left={-150}
+          // left={-150}
           bgcolor="background.default" // Optional: set the background color
         >
           <CircularProgress />

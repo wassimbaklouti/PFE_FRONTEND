@@ -362,15 +362,6 @@ function Dashboard() {
           </Grid>
         </MDBox> */}
       </MDBox>
-      <MDBox
-        width="100vw"
-        position="relative"
-        bgcolor="background.default" // Optional: to match your design
-        mt={2} // Optional: margin-top for spacing
-        left={-300}
-      >
-        <DashboardPosts />
-      </MDBox>
     </DashboardLayout>
   );
 }

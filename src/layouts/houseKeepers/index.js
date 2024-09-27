@@ -76,7 +76,7 @@ function HouseKeepers() {
 
   return (
     <DashboardLayout>
-      {/* <DashboardNavbar /> */}
+      <DashboardNavbar />
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           HouseKeepers List

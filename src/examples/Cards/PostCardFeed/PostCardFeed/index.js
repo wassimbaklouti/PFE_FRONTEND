@@ -294,7 +294,10 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={handleSubmitComment}>
+                    <IconButton
+                      onClick={handleSubmitComment}
+                      disabled={!comment.trim()} // Disables the button if the comment is empty
+                    >
                       <SendIcon />
                     </IconButton>
                   </InputAdornment>

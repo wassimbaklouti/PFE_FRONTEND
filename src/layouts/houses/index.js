@@ -9,7 +9,7 @@ import MDTypography from "components/MDTypography";
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DefaultProjectCard from "examples/Cards/HouseCards/DefaultHouseCard";
-
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 // Placeholder images
 import defaultImage from "assets/images/team-1.jpg"; // Assurez-vous d'avoir une image par défaut
 
@@ -38,6 +38,7 @@ function Houses() {
 
   return (
     <DashboardLayout>
+      <DashboardNavbar />
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Houses List

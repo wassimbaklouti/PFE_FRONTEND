@@ -84,7 +84,7 @@ function DashboardPosts() {
 
   return (
     <DashboardLayout>
-      {/* <DashboardNavbar /> */}
+      <DashboardNavbar />
       <MDBox py={3}>
         <MDTypography variant="h4">Posts Section</MDTypography>
         <Grid container justifyContent="center">

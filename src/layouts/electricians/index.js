@@ -6,7 +6,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -79,6 +79,7 @@ function Electricians() {
 
   return (
     <DashboardLayout>
+      <DashboardNavbar />
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Electricians List
