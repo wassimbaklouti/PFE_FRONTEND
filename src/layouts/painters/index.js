@@ -99,8 +99,10 @@ function Painters() {
                     image={painter.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`Painter #${index + 1}`}
                     title={`${painter.firstName} ${painter.lastName}`}
-                    description={`Expertise: ${painter.expertise}\nCity: ${painter.city}`}
+                    description={`Expertise: ${painter.expertise}`}
                     handymanUsername={painter.username}
+                    phoneNumber={painter.phoneNumber}
+                    city={`City : ${painter.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/painters/painter-overview/${painter.userId}`, // Met à jour le chemin avec l'ID du plombier

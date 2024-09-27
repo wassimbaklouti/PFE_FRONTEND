@@ -99,8 +99,10 @@ function BabySitters() {
                     image={babySitter.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`BabySitter #${index + 1}`}
                     title={`${babySitter.firstName} ${babySitter.lastName}`}
-                    description={`Expertise: ${babySitter.expertise}\nCity: ${babySitter.city}`}
+                    description={`Expertise: ${babySitter.expertise}`}
                     handymanUsername={babySitter.username}
+                    phoneNumber={babySitter.phoneNumber}
+                    city={`City : ${babySitter.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/babySitters/babySitter-overview/${babySitter.userId}`, // Met à jour le chemin avec l'ID du plombier

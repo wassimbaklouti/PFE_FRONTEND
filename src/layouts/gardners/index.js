@@ -99,8 +99,10 @@ function Gardners() {
                     image={gardner.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`Gardner #${index + 1}`}
                     title={`${gardner.firstName} ${gardner.lastName}`}
-                    description={`Expertise: ${gardner.expertise}\nCity: ${gardner.city}`}
+                    description={`Expertise: ${gardner.expertise}`}
                     handymanUsername={gardner.username}
+                    phoneNumber={gardner.phoneNumber}
+                    city={`City : ${gardner.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/gardners/gardner-overview/${gardner.userId}`, // Met à jour le chemin avec l'ID du plombier

@@ -6,6 +6,8 @@ import Divider from "@mui/material/Divider";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Autocomplete from "@mui/material/Autocomplete";
+import Card from "@mui/material/Card";
+import MasterCard from "examples/Cards/MasterCard";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -35,6 +37,7 @@ import team4 from "assets/images/team-4.jpg";
 
 function Overview() {
   const [profile, setProfile] = useState(null);
+  const [connectedUser, setConnectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,15 +78,43 @@ function Overview() {
   const [buildings, setBuildings] = useState([]);
   const [activeForm, setActiveForm] = useState(null); // To toggle between post and building form
 
+  const fetchConnectedUser = async () => {
+    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    if (token) {
+      try {
+        const response = await fetch("/PI/connected-user", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setConnectedUser(data);
+          console.log("connecteduserrrr ", connectedUser);
+        } else {
+          console.error("Failed to fetch profile");
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    }
+  };
+
   const fetchBuilding = async () => {
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
-    const buildingsResponse = await fetch(`/PI/api/buildings/owner/username/${profile.username}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const buildingsResponse = await fetch(
+      `/PI/api/buildings/owner/username/${connectedUser.username}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     if (buildingsResponse.ok) {
       const buildingsData = await buildingsResponse.json();
       setBuildings(buildingsData);
@@ -94,65 +125,44 @@ function Overview() {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      await fetchConnectedUser();
       const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
       console.log("Token:", token); // Debug: Check if token is retrieved
+      console.log("connected user : ", connectedUser);
+      if (connectedUser) {
+        setProfile(connectedUser);
+        console.log("profileee ", profile);
+        setFormData({
+          firstName: connectedUser.firstName || "",
+          lastName: connectedUser.lastName || "",
+          username: connectedUser.username || "",
+          email: connectedUser.email || "",
+          phoneNumber: connectedUser.phoneNumber || "",
+          city: connectedUser.city || "",
+          isActive: connectedUser.active || "",
+          isNotLocked: connectedUser.notLocked || "",
+          profileImage: connectedUser.profileImageUrl || "",
+          role: connectedUser.role || "",
+          currentUsername: connectedUser.username || "",
+        });
 
-      if (token) {
-        try {
-          const response = await fetch("/PI/connected-user", {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
+        const postsResponse = await fetch(`/PI/api/posts/user/${connectedUser.username}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            setProfile(data);
-            setFormData({
-              firstName: data.firstName || "",
-              lastName: data.lastName || "",
-              username: data.username || "",
-              email: data.email || "",
-              phoneNumber: data.phoneNumber || "",
-              city: data.city || "",
-              isActive: data.active || "",
-              isNotLocked: data.notLocked || "",
-              profileImage: data.profileImageUrl || "",
-              role: data.role || "",
-              currentUsername: data.username || "",
-            });
-
-            // Fetch posts
-            const postsResponse = await fetch(`/PI/api/posts/user/${data.username}`, {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            });
-
-            if (postsResponse.ok) {
-              const postsData = await postsResponse.json();
-              setPosts(postsData);
-            } else {
-              console.error("Failed to fetch posts");
-            }
-
-            // Fetch buildings
-            fetchBuilding();
-          } else {
-            console.error("Failed to fetch profile");
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
+        if (postsResponse.ok) {
+          const postsData = await postsResponse.json();
+          setPosts(postsData);
+        } else {
+          console.error("Failed to fetch posts");
         }
-      } else {
-        console.warn("No token found in localStorage");
+        fetchBuilding();
+        setLoading(false);
       }
-
-      setLoading(false);
     };
     const fetchCities = async () => {
       try {
@@ -173,7 +183,7 @@ function Overview() {
 
     fetchProfile();
     fetchCities();
-  }, []);
+  }, [connectedUser]);
 
   const handleEdit = () => {
     setEditMode(true);
@@ -382,9 +392,9 @@ function Overview() {
           <Header profile={profile} />
           <MDBox mt={5} mb={3}>
             <Grid container spacing={1}>
-              <Grid item xs={12} md={6} xl={4}>
+              {/* <Grid item xs={12} md={6} xl={4}>
                 <PlatformSettings />
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} md={6} xl={4} sx={{ display: "flex" }}>
                 <Divider orientation="vertical" sx={{ ml: -2, mr: 1 }} />
                 {!editMode ? (
@@ -401,45 +411,55 @@ function Overview() {
                     action={{ route: "", tooltip: "Edit Profile", onClick: handleEdit }}
                   />
                 ) : (
-                  <MDBox component="form" onSubmit={handleSubmit}>
-                    <MDTypography variant="h6">Edit Profile</MDTypography>
-                    <TextField
-                      label="Username"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Phone Number"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <Autocomplete
-                      options={cities}
-                      getOptionLabel={(option) => option}
-                      value={formData.city}
-                      onChange={handleCityChange}
-                      renderInput={(params) => (
-                        <TextField {...params} label="City" fullWidth margin="normal" />
-                      )}
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                      Save
-                    </Button>
-                  </MDBox>
+                  <Card sx={{ height: "100%", width: "100%" }}>
+                    <MDBox
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      pt={2}
+                      px={2}
+                    >
+                      <MDBox component="form" onSubmit={handleSubmit}>
+                        <MDTypography variant="h6">Edit Profile</MDTypography>
+                        <TextField
+                          label="Username"
+                          name="username"
+                          value={formData.username}
+                          onChange={handleChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Phone Number"
+                          name="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={handleChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <Autocomplete
+                          options={cities}
+                          getOptionLabel={(option) => option}
+                          value={formData.city}
+                          onChange={handleCityChange}
+                          renderInput={(params) => (
+                            <TextField {...params} label="City" fullWidth margin="normal" />
+                          )}
+                        />
+                        <Button type="submit" variant="contained" color="white" fullWidth>
+                          Save
+                        </Button>
+                      </MDBox>
+                    </MDBox>
+                  </Card>
                 )}
               </Grid>
 
@@ -465,34 +485,44 @@ function Overview() {
                   </MDBox>
                 )}
                 {profile.role !== "ROLE_PROPERTYOWNER" && (
-                  <MDBox component="form" onSubmit={handleNewPostSubmit}>
-                    <MDTypography variant="h6">Add New Post</MDTypography>
-                    <TextField
-                      label="Title"
-                      name="title"
-                      value={newPostData.title}
-                      onChange={handleNewPostChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Content"
-                      name="content"
-                      value={newPostData.content}
-                      onChange={handleNewPostChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <input
-                      accept="image/*"
-                      type="file"
-                      onChange={handleImageFileChange}
-                      style={{ margin: "16px 0" }} // Add some margin for better layout
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                      Add Post
-                    </Button>
-                  </MDBox>
+                  <Card sx={{ height: "100%", width: "100%" }}>
+                    <MDBox
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      pt={2}
+                      px={2}
+                    >
+                      <MDBox component="form" onSubmit={handleNewPostSubmit}>
+                        <MDTypography variant="h6">Add New Post</MDTypography>
+                        <TextField
+                          label="Title"
+                          name="title"
+                          value={newPostData.title}
+                          onChange={handleNewPostChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Content"
+                          name="content"
+                          value={newPostData.content}
+                          onChange={handleNewPostChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <input
+                          accept="image/*"
+                          type="file"
+                          onChange={handleImageFileChange}
+                          style={{ margin: "16px 0" }} // Add some margin for better layout
+                        />
+                        <Button type="submit" variant="contained" color="white" fullWidth>
+                          Add Post
+                        </Button>
+                      </MDBox>
+                    </MDBox>
+                  </Card>
                 )}
 
                 {/* Conditional rendering of forms based on activeForm */}
@@ -576,6 +606,29 @@ function Overview() {
                   </MDBox>
                 )}
               </Grid>
+              <Grid item xs={12} md={6} xl={4}>
+                <Card sx={{ height: "100%", width: "100%" }}>
+                  <MDBox
+                    display="flex"
+                    flexDirection="column" // Change to column layout
+                    justifyContent="flex-start" // Align items to the start
+                    alignItems="flex-start" // Align items to the start
+                    pt={2}
+                    px={2}
+                    pb={2}
+                  >
+                    <MDTypography variant="h6" sx={{ marginBottom: "16px" }}>
+                      Billing Info
+                    </MDTypography>
+                    <MasterCard
+                      number={4562112245947852}
+                      holder={`${connectedUser.firstName} ${connectedUser.lastName}`}
+                      expires="11/22"
+                      sx={{ marginTop: "24px" }}
+                    />
+                  </MDBox>
+                </Card>
+              </Grid>
             </Grid>
           </MDBox>
 
@@ -612,29 +665,31 @@ function Overview() {
             </>
           </MDBox>
           {/* Building section */}
-          <MDBox p={2}>
-            Buildings Section
-            <Grid container spacing={6}>
-              {buildings.length > 0 ? (
-                buildings.map((building) => (
-                  <Grid item xs={12} md={6} xl={3} key={building.id}>
-                    <BuildingCard
-                      buildingId={building.id}
-                      image={homeDecor1} // Replace with building image if available
-                      type={building.type}
-                      address={building.address}
-                      rooms={building.rooms}
-                      price={building.price}
-                      area={building.area}
-                      owner={building.owner}
-                    />
-                  </Grid>
-                ))
-              ) : (
-                <div>No buildings found.</div>
-              )}
-            </Grid>
-          </MDBox>
+          {profile.role === "ROLE_PROPERTYOWNER" && (
+            <MDBox p={2}>
+              Buildings Section
+              <Grid container spacing={6}>
+                {buildings.length > 0 ? (
+                  buildings.map((building) => (
+                    <Grid item xs={12} md={6} xl={3} key={building.id}>
+                      <BuildingCard
+                        buildingId={building.id}
+                        image={homeDecor1} // Replace with building image if available
+                        type={building.type}
+                        address={building.address}
+                        rooms={building.rooms}
+                        price={building.price}
+                        area={building.area}
+                        owner={building.owner}
+                      />
+                    </Grid>
+                  ))
+                ) : (
+                  <div>No buildings found.</div>
+                )}
+              </Grid>
+            </MDBox>
+          )}
         </>
       )}
     </DashboardLayout>

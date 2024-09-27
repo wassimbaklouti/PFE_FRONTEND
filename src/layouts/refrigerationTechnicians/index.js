@@ -101,8 +101,10 @@ function RefrigerationTechnicians() {
                     image={refrigerationTechnician.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`RefrigerationTechnician #${index + 1}`}
                     title={`${refrigerationTechnician.firstName} ${refrigerationTechnician.lastName}`}
-                    description={`Expertise: ${refrigerationTechnician.expertise}\nCity: ${refrigerationTechnician.city}`}
+                    description={`Expertise: ${refrigerationTechnician.expertise}`}
                     handymanUsername={refrigerationTechnician.username}
+                    phoneNumber={refrigerationTechnician.phoneNumber}
+                    city={`City : ${refrigerationTechnician.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/refrigerationTechnicians/refrigerationTechnician-overview/${refrigerationTechnician.userId}`, // Met à jour le chemin avec l'ID du plombier

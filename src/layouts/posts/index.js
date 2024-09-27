@@ -100,12 +100,12 @@ function DashboardPosts() {
                   date={formatDate(post.date)}
                   likes={likesData[post.id] || 0}
                   comments={commentsData[post.id] || []}
-                  action={{
-                    type: "internal",
-                    route: `/posts/${post.id}`,
-                    color: "info",
-                    label: "Voir le post",
-                  }}
+                  // action={{
+                  //   type: "internal",
+                  //   route: `/posts/${post.id}`,
+                  //   color: "info",
+                  //   label: "Voir le post",
+                  // }}
                 />
               ))
             ) : (

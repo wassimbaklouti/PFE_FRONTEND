@@ -1,6 +1,5 @@
 // Required imports
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
@@ -12,6 +11,11 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 import MDAvatar from "components/MDAvatar";
+import Dialog from "@mui/material/Dialog"; // Import Dialog components
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
 
 function DefaultProjectCard({
   image,
@@ -21,12 +25,15 @@ function DefaultProjectCard({
   action,
   authors,
   handymanUsername,
+  phoneNumber,
+  city,
   userUsername,
 }) {
   const [rating, setRating] = useState(0); // Overall rating
   const [userRating, setUserRating] = useState(0); // User's rating
   const [connectedUser, setConnectedUser] = useState(null);
   const [showRatingSection, setShowRatingSection] = useState(false); // To toggle the rating section
+  const [openDialog, setOpenDialog] = useState(false); // State to control dialog open/close
 
   // Function to submit or update the rating
   const submitRating = async (newRating) => {
@@ -45,6 +52,7 @@ function DefaultProjectCard({
         });
       }
       setUserRating(newRating);
+      fetchOverallRating(); // Refresh overall rating after submission
     } catch (error) {
       console.error("Error submitting rating:", error);
     }
@@ -60,6 +68,7 @@ function DefaultProjectCard({
         },
       });
       setUserRating(0); // Reset the user's rating to 0
+      fetchOverallRating(); // Refresh overall rating after deletion
     } catch (error) {
       console.error("Error deleting rating:", error);
     }
@@ -114,150 +123,213 @@ function DefaultProjectCard({
     fetchOverallRating(); // Fetch overall rating when component mounts
   }, [handymanUsername]);
 
-  const renderAuthors = authors.map(({ image: media, name }) => (
-    <Tooltip key={name} title={name} placement="bottom">
-      <MDAvatar
-        src={media}
-        alt={name}
-        size="xs"
-        sx={({ borders: { borderWidth }, palette: { white } }) => ({
-          border: `${borderWidth[2]} solid ${white.main}`,
-          cursor: "pointer",
-          position: "relative",
-          ml: -1.25,
+  // const renderAuthors = authors.map(({ image: media, name }) => (
+  //   <Tooltip key={name} title={name} placement="bottom">
+  //     <MDAvatar
+  //       src={media}
+  //       alt={name}
+  //       size="xs"
+  //       sx={({ borders: { borderWidth }, palette: { white } }) => ({
+  //         border: `${borderWidth[2]} solid ${white.main}`,
+  //         cursor: "pointer",
+  //         position: "relative",
+  //         ml: -1.25,
 
-          "&:hover, &:focus": {
-            zIndex: "10",
-          },
-        })}
-      />
-    </Tooltip>
-  ));
+  //         "&:hover, &:focus": {
+  //           zIndex: "10",
+  //         },
+  //       })}
+  //     />
+  //   </Tooltip>
+  // ));
+
+  // Handlers for opening and closing the dialog
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+    setShowRatingSection(false); // Reset rating section when dialog opens
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
 
   return (
-    <Card
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "transparent",
-        boxShadow: "none",
-        overflow: "visible",
-        width: "120%",
-      }}
-    >
-      <MDBox position="relative" width="100.25%" shadow="xl" borderRadius="xl">
-        <CardMedia
-          src={image}
-          component="img"
-          title={title}
-          sx={{
-            maxWidth: "100%",
-            margin: 0,
-            boxShadow: ({ boxShadows: { md } }) => md,
-            objectFit: "cover",
-            objectPosition: "center",
-          }}
-        />
-      </MDBox>
-      <MDBox mt={1} mx={0.5}>
-        <MDTypography variant="button" fontWeight="regular" color="text" textTransform="capitalize">
-          {label}
-        </MDTypography>
-        <MDBox mb={1}>
-          {action.type === "internal" ? (
-            <MDTypography
-              component={Link}
-              to={action.route}
-              variant="h5"
-              textTransform="capitalize"
-            >
-              {title}
-            </MDTypography>
-          ) : (
-            <MDTypography
-              component="a"
-              href={action.route}
-              target="_blank"
-              rel="noreferrer"
-              variant="h5"
-              textTransform="capitalize"
-            >
-              {title}
-            </MDTypography>
-          )}
+    <>
+      {/* Card Component */}
+      <Card
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: "transparent",
+          boxShadow: "none",
+          overflow: "visible",
+          width: "120%",
+          cursor: "pointer",
+          "&:hover": {
+            transform: "scale(1.02)",
+            transition: "transform 0.3s ease-in-out",
+          },
+        }}
+        onClick={handleOpenDialog} // Open dialog on card click
+      >
+        <MDBox position="relative" width="100.25%" shadow="xl" borderRadius="xl">
+          <CardMedia
+            src={image}
+            component="img"
+            title={title}
+            sx={{
+              maxWidth: "100%",
+              margin: 0,
+              boxShadow: ({ boxShadows: { md } }) => md,
+              objectFit: "cover",
+              objectPosition: "center",
+            }}
+          />
         </MDBox>
-        <MDBox mb={3} lineHeight={0}>
-          <MDTypography variant="button" fontWeight="light" color="text">
+        <MDBox mt={1} mx={0.5}>
+          <MDTypography
+            variant="button"
+            fontWeight="regular"
+            color="text"
+            textTransform="capitalize"
+          >
+            {label}
+          </MDTypography>
+          <MDBox mb={1}>
+            <MDTypography variant="h5" textTransform="capitalize">
+              {title}
+            </MDTypography>
+          </MDBox>
+          <MDBox mb={3} lineHeight={0}>
+            <MDTypography variant="button" fontWeight="light" color="text">
+              {description}
+            </MDTypography>
+          </MDBox>
+          <MDBox mb={3} lineHeight={0}>
+            <MDTypography variant="button" fontWeight="light" color="text">
+              {city}
+            </MDTypography>
+          </MDBox>
+
+          {/* Overall rating display */}
+          <MDBox mb={3} display="flex" alignItems="center">
+            <MDTypography variant="button" fontWeight="regular" color="text">
+              Overall Rating : {rating.toFixed(2)}/5.00
+            </MDTypography>
+          </MDBox>
+
+          {/* <MDBox display="flex" justifyContent="space-between" alignItems="center">
+            <MDBox display="flex">{renderAuthors}</MDBox>
+          </MDBox> */}
+        </MDBox>
+      </Card>
+
+      {/* Dialog Component */}
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>{`${title}`}</DialogTitle>
+        <DialogContent>
+          <MDBox mb={2}>
+            <CardMedia
+              src={image}
+              component="img"
+              title={title}
+              sx={{
+                width: "100%",
+                height: "300px",
+                objectFit: "cover",
+                borderRadius: "8px",
+              }}
+            />
+          </MDBox>
+          <MDTypography variant="body1" color="text" gutterBottom>
             {description}
           </MDTypography>
-        </MDBox>
-
-        {/* Overall rating display */}
-        <MDBox mb={3} display="flex" alignItems="center">
-          <MDTypography variant="button" fontWeight="regular" color="text">
-            Overall Rating : {rating}/5
+          <MDTypography variant="body1" color="text" gutterBottom>
+            {city}
           </MDTypography>
-        </MDBox>
+          <MDTypography variant="body1" color="text" gutterBottom>
+            Phone Number : {phoneNumber}
+          </MDTypography>
 
-        {/* Toggle rating section */}
-        {showRatingSection && (
-          <>
-            {/* User rating system */}
-            <MDBox mb={3} display="flex" alignItems="center">
-              <MDTypography variant="button" fontWeight="regular" color="text">
-                Your Rating:
-              </MDTypography>
-              <Rating
-                name="handyman-rating"
-                value={userRating} // Show the user's rating
-                onChange={(event, newValue) => submitRating(newValue)} // Update rating when changed
-                max={5}
-                size="medium"
-                sx={{ ml: 1 }}
-              />
-            </MDBox>
+          {/* Overall rating display */}
+          <MDBox mt={2} mb={2} display="flex" alignItems="center">
+            <MDTypography variant="button" fontWeight="regular" color="text">
+              Overall Rating: {rating.toFixed(2)}/5.00
+            </MDTypography>
+          </MDBox>
 
-            {/* Clear rating button */}
-            <MDButton variant="outlined" size="small" color="error" onClick={deleteRating}>
-              Clear Rating
-            </MDButton>
-          </>
-        )}
+          {/* Toggle rating section */}
+          {connectedUser && (
+            <>
+              {showRatingSection ? (
+                <>
+                  {/* User rating system */}
+                  <MDBox mb={2} display="flex" alignItems="center">
+                    <MDTypography variant="button" fontWeight="regular" color="text">
+                      Your Rating:
+                    </MDTypography>
+                    <Rating
+                      name="handyman-rating"
+                      value={userRating} // Show the user's rating
+                      onChange={(event, newValue) => submitRating(newValue)} // Update rating when changed
+                      max={5}
+                      size="medium"
+                      sx={{ ml: 1 }}
+                    />
+                  </MDBox>
 
-        {/* Rate Handyman button */}
-        {!showRatingSection && (
-          <MDButton
-            variant="outlined"
-            size="small"
-            color="primary"
-            onClick={() => setShowRatingSection(true)}
-          >
-            Rate Handyman
-          </MDButton>
-        )}
-
-        <MDBox display="flex" justifyContent="space-between" alignItems="center">
-          <MDBox display="flex">{renderAuthors}</MDBox>
-        </MDBox>
-      </MDBox>
-    </Card>
+                  {/* Clear rating button */}
+                  <MDButton
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={deleteRating}
+                    sx={{ mt: 1 }}
+                  >
+                    Clear Rating
+                  </MDButton>
+                </>
+              ) : (
+                <MDButton
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                  onClick={() => setShowRatingSection(true)}
+                >
+                  Rate Handyman
+                </MDButton>
+              )}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
-// Setting default values for the props of DefaultProjectCard
+// Default props for the card
 DefaultProjectCard.defaultProps = {
   authors: [],
+  userRating: 0,
+  connectedUser: null,
 };
 
-// Typechecking props for the DefaultProjectCard
+// Typechecking for the card
 DefaultProjectCard.propTypes = {
   image: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
+  phoneNumber: PropTypes.number.isRequired,
+  city: PropTypes.string.isRequired,
   action: PropTypes.shape({
-    type: PropTypes.oneOf(["external", "internal"]),
-    route: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(["internal", "external"]),
+    route: PropTypes.string,
     color: PropTypes.oneOf([
       "primary",
       "secondary",
@@ -267,13 +339,12 @@ DefaultProjectCard.propTypes = {
       "error",
       "light",
       "dark",
-      "white",
-    ]).isRequired,
-    label: PropTypes.string.isRequired,
+    ]),
+    label: PropTypes.string,
   }).isRequired,
   authors: PropTypes.arrayOf(PropTypes.object),
-  handymanUsername: PropTypes.string.isRequired, // Add handyman username prop
-  userUsername: PropTypes.string.isRequired, // Add user username prop
+  handymanUsername: PropTypes.string.isRequired,
+  userUsername: PropTypes.string.isRequired,
 };
 
 export default DefaultProjectCard;

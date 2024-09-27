@@ -99,8 +99,10 @@ function Welders() {
                     image={welder.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`Welder #${index + 1}`}
                     title={`${welder.firstName} ${welder.lastName}`}
-                    description={`Expertise: ${welder.expertise}\nCity: ${welder.city}`}
+                    description={`Expertise: ${welder.expertise}`}
                     handymanUsername={welder.username}
+                    phoneNumber={welder.phoneNumber}
+                    city={`City : ${welder.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/welders/welder-overview/${welder.userId}`, // Met à jour le chemin avec l'ID du plombier

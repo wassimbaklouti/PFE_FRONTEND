@@ -99,8 +99,10 @@ function Plumbers() {
                     image={plumber.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`Plumber #${index + 1}`}
                     title={`${plumber.firstName} ${plumber.lastName}`}
-                    description={`Expertise: ${plumber.expertise}\nCity: ${plumber.city}`}
+                    description={`Expertise: ${plumber.expertise}`}
                     handymanUsername={plumber.username}
+                    phoneNumber={plumber.phoneNumber}
+                    city={`City : ${plumber.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/plumbers/plumber-overview/${plumber.userId}`, // Met à jour le chemin avec l'ID du plombier

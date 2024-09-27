@@ -101,8 +101,10 @@ function HomeApplianceTechnicians() {
                     image={homeApplianceTechnician.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`HomeApplianceTechnician #${index + 1}`}
                     title={`${homeApplianceTechnician.firstName} ${homeApplianceTechnician.lastName}`}
-                    description={`Expertise: ${homeApplianceTechnician.expertise}\nCity: ${homeApplianceTechnician.city}`}
+                    description={`Expertise: ${homeApplianceTechnician.expertise}`}
                     handymanUsername={homeApplianceTechnician.username}
+                    phoneNumber={homeApplianceTechnician.phoneNumber}
+                    city={`City : ${homeApplianceTechnician.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/homeApplianceTechnicians/homeApplianceTechnician-overview/${homeApplianceTechnician.userId}`, // Met à jour le chemin avec l'ID du plombier

@@ -99,8 +99,10 @@ function Masons() {
                     image={mason.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`Mason #${index + 1}`}
                     title={`${mason.firstName} ${mason.lastName}`}
-                    description={`Expertise: ${mason.expertise}\nCity: ${mason.city}`}
+                    description={`Expertise: ${mason.expertise}`}
                     handymanUsername={mason.username}
+                    phoneNumber={mason.phoneNumber}
+                    city={`City : ${mason.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/masons/mason-overview/${mason.userId}`, // Met à jour le chemin avec l'ID du plombier

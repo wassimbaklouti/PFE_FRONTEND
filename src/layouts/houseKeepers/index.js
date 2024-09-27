@@ -99,8 +99,10 @@ function HouseKeepers() {
                     image={houseKeeper.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`HouseKeeper #${index + 1}`}
                     title={`${houseKeeper.firstName} ${houseKeeper.lastName}`}
-                    description={`Expertise: ${houseKeeper.expertise}\nCity: ${houseKeeper.city}`}
+                    description={`Expertise: ${houseKeeper.expertise}`}
                     handymanUsername={houseKeeper.username}
+                    phoneNumber={houseKeeper.phoneNumber}
+                    city={`City : ${houseKeeper.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/houseKeepers/houseKeeper-overview/${houseKeeper.userId}`, // Met à jour le chemin avec l'ID du plombier

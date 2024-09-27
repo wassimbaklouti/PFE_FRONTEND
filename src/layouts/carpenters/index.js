@@ -99,8 +99,10 @@ function Carpenters() {
                     image={carpenter.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
                     label={`Carpenter #${index + 1}`}
                     title={`${carpenter.firstName} ${carpenter.lastName}`}
-                    description={`Expertise: ${carpenter.expertise}\nCity: ${carpenter.city}`}
+                    description={`Expertise: ${carpenter.expertise}`}
                     handymanUsername={carpenter.username}
+                    phoneNumber={carpenter.phoneNumber}
+                    city={`City : ${carpenter.city}`}
                     action={{
                       type: "internal",
                       route: `/pages/carpenters/carpenter-overview/${carpenter.userId}`, // Met à jour le chemin avec l'ID du plombier

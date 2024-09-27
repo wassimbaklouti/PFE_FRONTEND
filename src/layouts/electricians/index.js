@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -12,33 +13,26 @@ import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import FormControlComponent from "examples/FormControl";
-import Footer from "examples/Footer";
 import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
 
 // Placeholder images
-import defaultImage from "assets/images/team-1.jpg"; // Assurez-vous d'avoir une image par défaut
+import defaultImage from "assets/images/team-1.jpg";
 
 function Electricians() {
   const [electricians, setElectricians] = useState([]);
   const [filteredElectricians, setFilteredElectricians] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedElectrician, setSelectedElectrician] = useState(null); // State for dialog
 
   // Fetch Electricians data
   useEffect(() => {
-    fetch("http://localhost:8089/PI/handymen/electrician") // Votre endpoint API
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json(); // Conversion des données en JSON
-      })
+    fetch("http://localhost:8089/PI/handymen/electrician")
+      .then((response) => response.json())
       .then((data) => {
-        console.log("Electricians data:", data); // Afficher les données dans la console
-        setElectricians(data); // Stockage des données des plombiers
-        setFilteredElectricians(data); // Initialise le filtre avec tous les plombiers
+        setElectricians(data);
+        setFilteredElectricians(data);
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
@@ -65,7 +59,6 @@ function Electricians() {
     const city = event.target.value;
     setSelectedCity(city);
 
-    // Filter Electricians based on selected city
     if (city) {
       const filtered = electricians.filter((electrician) => electrician.city === city);
       setFilteredElectricians(filtered);
@@ -74,9 +67,18 @@ function Electricians() {
     }
   };
 
+  // Handle dialog open
+  const handleOpenDialog = (electrician) => {
+    setSelectedElectrician(electrician); // Set selected electrician data
+  };
+
+  // Handle dialog close
+  const handleCloseDialog = () => {
+    setSelectedElectrician(null); // Close dialog
+  };
+
   return (
     <DashboardLayout>
-      {/* <DashboardNavbar /> */}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Electricians List
@@ -96,31 +98,43 @@ function Electricians() {
               {filteredElectricians.map((electrician, index) => (
                 <Grid item xs={12} md={6} xl={2} key={electrician.userId || index}>
                   <DefaultProjectCard
-                    image={electrician.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
+                    image={electrician.profileImageUrl || defaultImage}
                     label={`Electrician #${index + 1}`}
                     title={`${electrician.firstName} ${electrician.lastName}`}
-                    description={`Expertise: ${electrician.expertise}\nCity: ${electrician.city}`}
+                    description={`Expertise: ${electrician.expertise}`}
                     handymanUsername={electrician.username}
-                    action={{
-                      type: "internal",
-                      route: `/pages/electricians/electrician-overview/${electrician.userId}`, // Met à jour le chemin avec l'ID du plombier
-                      color: "info",
-                      label: "View Profile",
-                    }}
-                    authors={[
-                      {
-                        image: electrician.profileImageUrl || defaultImage,
-                        name: `${electrician.firstName} ${electrician.lastName}`,
-                      },
-                    ]}
+                    phoneNumber={electrician.phoneNumber}
+                    city={`City : ${electrician.city}`}
+                    onClick={() => handleOpenDialog(electrician)} // Open dialog on card click
                   />
                 </Grid>
               ))}
             </Grid>
           </MDBox>
         </MDBox>
+
+        {/* Dialog for handyman details */}
+        {selectedElectrician && (
+          <Dialog open={Boolean(selectedElectrician)} onClose={handleCloseDialog}>
+            <DialogTitle>{`${selectedElectrician.firstName} ${selectedElectrician.lastName}`}</DialogTitle>
+            <DialogContent>
+              <MDTypography variant="body1">
+                Expertise: {selectedElectrician.expertise}
+              </MDTypography>
+              <MDTypography variant="body1"> City: {selectedElectrician.city} </MDTypography>
+              <MDTypography variant="body1">
+                Contact: {selectedElectrician.phoneNumber}
+              </MDTypography>
+              {/* Add more details here as needed */}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
       </MDBox>
-      {/* <Footer /> */}
     </DashboardLayout>
   );
 }
