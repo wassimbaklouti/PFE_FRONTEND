@@ -285,21 +285,23 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
           </MDBox>
         </DialogContent>
         <DialogActions>
-          <TextField
-            fullWidth
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Write your comment..."
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleSubmitComment}>
-                    <SendIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+          {connectedUser && (
+            <TextField
+              fullWidth
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Write your comment..."
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleSubmitComment}>
+                      <SendIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          )}
           <MDButton onClick={() => setDialogOpen(false)}>Close</MDButton>
         </DialogActions>
       </Dialog>

@@ -26,6 +26,8 @@ import Footer from "examples/Footer";
 import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import DashboardPosts from "layouts/posts";
+import MDTypography from "components/MDTypography";
 
 // Data
 import reportsBarChartData from "layouts/dashboard/data/reportsBarChartData";
@@ -360,7 +362,15 @@ function Dashboard() {
           </Grid>
         </MDBox> */}
       </MDBox>
-      {/* <Footer /> */}
+      <MDBox
+        width="100vw"
+        position="relative"
+        bgcolor="background.default" // Optional: to match your design
+        mt={2} // Optional: margin-top for spacing
+        left={-300}
+      >
+        <DashboardPosts />
+      </MDBox>
     </DashboardLayout>
   );
 }

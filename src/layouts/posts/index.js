@@ -86,6 +86,7 @@ function DashboardPosts() {
     <DashboardLayout>
       {/* <DashboardNavbar /> */}
       <MDBox py={3}>
+        <MDTypography variant="h4">Posts Section</MDTypography>
         <Grid container justifyContent="center">
           <Grid item xs={12} md={8}>
             {posts.length > 0 ? (

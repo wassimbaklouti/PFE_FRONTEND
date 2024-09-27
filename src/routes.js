@@ -114,7 +114,7 @@ const routes = [
     type: "collapse",
     name: "Posts",
     key: "Posts",
-    icon: <Icon fontSize="small">person</Icon>,
+    icon: <Icon fontSize="small">list</Icon>,
     route: "/posts",
     component: <Posts />,
   },
