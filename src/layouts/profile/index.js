@@ -8,11 +8,14 @@ import Button from "@mui/material/Button";
 import Autocomplete from "@mui/material/Autocomplete";
 import Card from "@mui/material/Card";
 import MasterCard from "examples/Cards/MasterCard";
-
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import CircularProgress from "@mui/material/CircularProgress";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-
+import PostAddIcon from "@mui/icons-material/PostAdd"; // Import PostAddIcon
+import HomeIcon from "@mui/icons-material/Home";
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -76,7 +79,7 @@ function Overview() {
 
   const [posts, setPosts] = useState([]);
   const [buildings, setBuildings] = useState([]);
-  const [activeForm, setActiveForm] = useState(null); // To toggle between post and building form
+  const [activeForm, setActiveForm] = useState("post"); // To toggle between post and building form
 
   const fetchConnectedUser = async () => {
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
@@ -104,84 +107,93 @@ function Overview() {
   };
 
   const fetchBuilding = async () => {
-    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
-    const buildingsResponse = await fetch(
-      `/PI/api/buildings/owner/username/${connectedUser.username}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (buildingsResponse.ok) {
-      const buildingsData = await buildingsResponse.json();
-      setBuildings(buildingsData);
-    } else {
-      console.error("Failed to fetch buildings");
-    }
-  };
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      await fetchConnectedUser();
+    // await fetchConnectedUser();
+    console.log("connected user ya l wess : ", connectedUser);
+    if (connectedUser) {
       const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
-      console.log("Token:", token); // Debug: Check if token is retrieved
-      console.log("connected user : ", connectedUser);
-      if (connectedUser) {
-        setProfile(connectedUser);
-        console.log("profileee ", profile);
-        setFormData({
-          firstName: connectedUser.firstName || "",
-          lastName: connectedUser.lastName || "",
-          username: connectedUser.username || "",
-          email: connectedUser.email || "",
-          phoneNumber: connectedUser.phoneNumber || "",
-          city: connectedUser.city || "",
-          isActive: connectedUser.active || "",
-          isNotLocked: connectedUser.notLocked || "",
-          profileImage: connectedUser.profileImageUrl || "",
-          role: connectedUser.role || "",
-          currentUsername: connectedUser.username || "",
-        });
-
-        const postsResponse = await fetch(`/PI/api/posts/user/${connectedUser.username}`, {
+      const buildingsResponse = await fetch(
+        `/PI/api/buildings/owner/username/${connectedUser.username}`,
+        {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        });
-
-        if (postsResponse.ok) {
-          const postsData = await postsResponse.json();
-          setPosts(postsData);
-        } else {
-          console.error("Failed to fetch posts");
         }
-        fetchBuilding();
-        setLoading(false);
+      );
+      if (buildingsResponse.ok) {
+        const buildingsData = await buildingsResponse.json();
+        setBuildings(buildingsData);
+      } else {
+        console.error("Failed to fetch buildings");
       }
-    };
-    const fetchCities = async () => {
-      try {
-        const response = await fetch(
-          "http://api.geonames.org/searchJSON?country=TN&maxRows=500&username=bakloutiwassim"
-        );
-        const data = await response.json();
-        if (data.geonames) {
-          const cities = data.geonames.map((city) => city.name);
-          setCities(cities);
-        } else {
-          console.error("No cities found");
-        }
-      } catch (error) {
-        console.error("Error fetching cities:", error);
-      }
-    };
+    }
+  };
 
+  const fetchProfile = async () => {
+    // await fetchConnectedUser();
+    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    console.log("Token:", token); // Debug: Check if token is retrieved
+    console.log("connected user : ", connectedUser);
+    if (connectedUser) {
+      setProfile(connectedUser);
+      console.log("profileee ", profile);
+      setFormData({
+        firstName: connectedUser.firstName || "",
+        lastName: connectedUser.lastName || "",
+        username: connectedUser.username || "",
+        email: connectedUser.email || "",
+        phoneNumber: connectedUser.phoneNumber || "",
+        city: connectedUser.city || "",
+        isActive: connectedUser.active || "",
+        isNotLocked: connectedUser.notLocked || "",
+        profileImage: connectedUser.profileImageUrl || "",
+        role: connectedUser.role || "",
+        currentUsername: connectedUser.username || "",
+      });
+
+      const postsResponse = await fetch(`/PI/api/posts/user/${connectedUser.username}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (postsResponse.ok) {
+        const postsData = await postsResponse.json();
+        setPosts(postsData);
+      } else {
+        console.error("Failed to fetch posts");
+      }
+      setLoading(false);
+    }
+  };
+  const fetchCities = async () => {
+    try {
+      const response = await fetch(
+        "http://api.geonames.org/searchJSON?country=TN&maxRows=500&username=bakloutiwassim"
+      );
+      const data = await response.json();
+      if (data.geonames) {
+        const cities = data.geonames.map((city) => city.name);
+        setCities(cities);
+      } else {
+        console.error("No cities found");
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConnectedUser();
+  }, []);
+
+  useEffect(() => {
+    //fetchConnectedUser();
     fetchProfile();
+    fetchBuilding();
     fetchCities();
   }, [connectedUser]);
 
@@ -312,6 +324,9 @@ function Overview() {
     }
   };
 
+  const handleFormChange = (event, newValue) => {
+    setActiveForm(newValue); // Update the active form when the tab is clicked
+  };
   // New function to handle the building form
   const handleNewBuildingChange = (e) => {
     const { name, value } = e.target;
@@ -386,7 +401,19 @@ function Overview() {
       {/* <DashboardNavbar /> */}
       <MDBox mb={2} />
       {loading ? (
-        <MDTypography variant="h6">Loading...</MDTypography>
+        <MDBox
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh" // Makes it take full height of the viewport
+          width="100vw" // Makes it take full width of the viewport
+          position="absolute" // Ensures it takes up the whole page
+          top={0}
+          left={-150}
+          bgcolor="background.default" // Optional: set the background color
+        >
+          <CircularProgress />
+        </MDBox>
       ) : (
         <>
           <Header profile={profile} />
@@ -465,11 +492,11 @@ function Overview() {
 
               <Grid item xs={12} xl={4}>
                 {/* Display Add Post and Add Building buttons only for Property Owners */}
-                {profile.role === "ROLE_PROPERTYOWNER" && (
+                {/* {profile.role === "ROLE_PROPERTYOWNER" && (
                   <MDBox mb={2}>
                     <Button
                       variant={activeForm === "post" ? "contained" : "outlined"}
-                      color="primary"
+                      color="white"
                       onClick={() => setActiveForm("post")}
                       sx={{ mr: 2 }}
                     >
@@ -477,13 +504,13 @@ function Overview() {
                     </Button>
                     <Button
                       variant={activeForm === "building" ? "contained" : "outlined"}
-                      color="secondary"
+                      color="white"
                       onClick={() => setActiveForm("building")}
                     >
                       Add New Building
                     </Button>
                   </MDBox>
-                )}
+                )} */}
                 {profile.role !== "ROLE_PROPERTYOWNER" && (
                   <Card sx={{ height: "100%", width: "100%" }}>
                     <MDBox
@@ -524,86 +551,118 @@ function Overview() {
                     </MDBox>
                   </Card>
                 )}
+                {profile.role === "ROLE_PROPERTYOWNER" && (
+                  <Card sx={{ height: "100%", width: "100%" }}>
+                    <MDBox
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      pt={2}
+                      px={2}
+                    >
+                      {/* Tabs for switching between Add Post and Add Building */}
+                      <Tabs
+                        value={activeForm}
+                        onChange={handleFormChange}
+                        aria-label="Form Tabs"
+                        sx={{ width: "100%" }}
+                      >
+                        <Tab
+                          label="Add New Post"
+                          value="post"
+                          icon={<PostAddIcon />} // Add PostAddIcon
+                          iconPosition="start" // Position icon at the start
+                        />
+                        <Tab
+                          label="Add New Building"
+                          value="building"
+                          icon={<HomeIcon />} // Add HomeIcon
+                          iconPosition="start" // Position icon at the start
+                        />
+                      </Tabs>
+                    </MDBox>
 
-                {/* Conditional rendering of forms based on activeForm */}
-                {activeForm === "post" && (
-                  <MDBox component="form" onSubmit={handleNewPostSubmit}>
-                    <MDTypography variant="h6">Add New Post</MDTypography>
-                    <TextField
-                      label="Title"
-                      name="title"
-                      value={newPostData.title}
-                      onChange={handleNewPostChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Content"
-                      name="content"
-                      value={newPostData.content}
-                      onChange={handleNewPostChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <input
-                      accept="image/*"
-                      type="file"
-                      onChange={handleImageFileChange}
-                      style={{ margin: "16px 0" }} // Add some margin for better layout
-                    />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                      Add Post
-                    </Button>
-                  </MDBox>
-                )}
+                    {/* Conditional Rendering Based on Active Tab */}
+                    {activeForm === "post" && (
+                      <MDBox component="form" onSubmit={handleNewPostSubmit} p={2}>
+                        <MDTypography variant="h6">Add New Post</MDTypography>
+                        <TextField
+                          label="Title"
+                          name="title"
+                          value={newPostData.title}
+                          onChange={handleNewPostChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Content"
+                          name="content"
+                          value={newPostData.content}
+                          onChange={handleNewPostChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <input
+                          accept="image/*"
+                          type="file"
+                          onChange={handleImageFileChange}
+                          style={{ margin: "16px 0" }}
+                        />
+                        <Button type="submit" variant="contained" color="white" fullWidth>
+                          Add Post
+                        </Button>
+                      </MDBox>
+                    )}
 
-                {activeForm === "building" && (
-                  <MDBox component="form" onSubmit={handleNewBuildingSubmit}>
-                    <MDTypography variant="h6">Add New Building</MDTypography>
-                    <TextField
-                      label="Type"
-                      name="type"
-                      value={newBuildingData.type}
-                      onChange={handleNewBuildingChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Adress"
-                      name="address"
-                      value={newBuildingData.address}
-                      onChange={handleNewBuildingChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Rooms"
-                      name="rooms"
-                      value={newBuildingData.rooms}
-                      onChange={handleNewBuildingChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Price"
-                      name="price"
-                      value={newBuildingData.price}
-                      onChange={handleNewBuildingChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <TextField
-                      label="Area"
-                      name="area"
-                      value={newBuildingData.area}
-                      onChange={handleNewBuildingChange}
-                      fullWidth
-                      margin="normal"
-                    />
-                    <Button type="submit" variant="contained" color="secondary" fullWidth>
-                      Add Building
-                    </Button>
-                  </MDBox>
+                    {activeForm === "building" && (
+                      <MDBox component="form" onSubmit={handleNewBuildingSubmit} p={2}>
+                        <MDTypography variant="h6">Add New Building</MDTypography>
+                        <TextField
+                          label="Type"
+                          name="type"
+                          value={newBuildingData.type}
+                          onChange={handleNewBuildingChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Address"
+                          name="address"
+                          value={newBuildingData.address}
+                          onChange={handleNewBuildingChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Rooms"
+                          name="rooms"
+                          value={newBuildingData.rooms}
+                          onChange={handleNewBuildingChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Price"
+                          name="price"
+                          value={newBuildingData.price}
+                          onChange={handleNewBuildingChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Area"
+                          name="area"
+                          value={newBuildingData.area}
+                          onChange={handleNewBuildingChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <Button type="submit" variant="contained" color="white" fullWidth>
+                          Add Building
+                        </Button>
+                      </MDBox>
+                    )}
+                  </Card>
                 )}
               </Grid>
               <Grid item xs={12} md={6} xl={4}>
