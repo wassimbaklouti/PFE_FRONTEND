@@ -47,6 +47,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
     // Clear the token from storage
     sessionStorage.removeItem("jwt-Token");
     localStorage.removeItem("jwt-Token");
+    localStorage.removeItem("role");
     // Redirect to home or sign-in page
     navigate("/authentication/sign-in"); // Change the path as needed
   };

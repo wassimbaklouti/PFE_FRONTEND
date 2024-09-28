@@ -554,7 +554,7 @@ function Overview() {
                       px={2}
                     >
                       <MDBox component="form" onSubmit={handleNewPostSubmit}>
-                        <MDTypography variant="h6">Add New Post</MDTypography>
+                        <MDTypography variant="h5">Add New Post</MDTypography>
                         <TextField
                           label="Title"
                           name="title"

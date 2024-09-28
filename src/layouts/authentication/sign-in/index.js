@@ -39,15 +39,18 @@ function Basic() {
         const result = await response.json();
         const token = response.headers.get("jwt-Token");
         const role = result.role; // Assuming the role is returned in the response
+        console.log("role signin ", role);
 
         if (rememberMe) {
           sessionStorage.clear();
           localStorage.clear();
+          localStorage.setItem("role", role);
           localStorage.setItem("jwt-Token", token);
         } else {
           localStorage.clear();
           sessionStorage.clear();
           sessionStorage.setItem("jwt-Token", token);
+          localStorage.setItem("role", role);
         }
 
         // Role-based redirection
@@ -56,7 +59,7 @@ function Basic() {
         } else if (role === "ROLE_USER") {
           navigate("/dashboard");
         } else if (role === "ROLE_ADMIN") {
-          navigate("/tables");
+          navigate("/DashboardAdmin");
         } else {
           console.error("Unknown role:", role);
         }

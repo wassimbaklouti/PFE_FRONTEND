@@ -37,12 +37,15 @@ Coded by www.creative-tim.com
 
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
+import DashboardAdmin from "layouts/dashboardAdmin";
 import Posts from "layouts/posts";
+import PostsAdmin from "layouts/postsAdmin";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
+import ProfileAdmin from "layouts/profileAdmin";
 import Plumbers from "layouts/plumbers";
 import Gardners from "layouts/gardners";
 import HouseKeepers from "layouts/houseKeepers";
@@ -65,6 +68,15 @@ const routes = [
   {
     type: "collapse",
     name: "Dashboard",
+    key: "DashboardAdmin",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/DashboardAdmin",
+    component: <DashboardAdmin />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "",
+    name: "Dashboard",
     key: "dashboard",
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard/",
@@ -77,9 +89,10 @@ const routes = [
     icon: <Icon fontSize="small">table_view</Icon>,
     route: "/tables",
     component: <Tables />,
+    roles: ["ROLE_ADMIN"],
   },
   {
-    type: "collapse",
+    type: "",
     name: "Billing",
     key: "billing",
     icon: <Icon fontSize="small">receipt_long</Icon>,
@@ -87,7 +100,7 @@ const routes = [
     component: <Billing />,
   },
   {
-    type: "collapse",
+    type: "",
     name: "RTL",
     key: "rtl",
     icon: <Icon fontSize="small">format_textdirection_r_to_l</Icon>,
@@ -95,7 +108,7 @@ const routes = [
     component: <RTL />,
   },
   {
-    type: "collapse",
+    type: "",
     name: "Payment",
     key: "notifications",
     icon: <Icon fontSize="small">notifications</Icon>,
@@ -105,13 +118,32 @@ const routes = [
   {
     type: "collapse",
     name: "Profile",
+    key: "ProfileAdmin",
+    icon: <Icon fontSize="small">person</Icon>,
+    route: "/ProfileAdmin",
+    component: <ProfileAdmin />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "",
+    name: "Profile",
     key: "profile",
     icon: <Icon fontSize="small">person</Icon>,
     route: "/profile",
     component: <Profile />,
+    roles: ["ROLE_USER", "ROLE_PROPERTYOWNER", "ROLE_HANDYMAN"],
   },
   {
     type: "collapse",
+    name: "Posts",
+    key: "PostsAdmin",
+    icon: <Icon fontSize="small">list</Icon>,
+    route: "/PostsAdmin",
+    component: <PostsAdmin />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "",
     name: "Posts",
     key: "Posts",
     icon: <Icon fontSize="small">list</Icon>,
@@ -119,7 +151,7 @@ const routes = [
     component: <Posts />,
   },
   {
-    type: "collapse",
+    type: "",
     name: "Sign In",
     key: "sign-in",
     icon: <Icon fontSize="small">login</Icon>,
@@ -223,7 +255,7 @@ const routes = [
     component: <Houses />,
   },
   {
-    type: "collapse",
+    type: "",
     name: "Sign Up",
     key: "sign-up",
     icon: <Icon fontSize="small">assignment</Icon>,

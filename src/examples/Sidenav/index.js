@@ -16,7 +16,7 @@ Coded by www.creative-tim.com
 import { useEffect } from "react";
 
 // react-router-dom components
-import { useLocation, NavLink } from "react-router-dom";
+import { useLocation, NavLink, useNavigate } from "react-router-dom";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
@@ -62,6 +62,15 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   }
 
   const closeSidenav = () => setMiniSidenav(dispatch, true);
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    // Clear the token from storage
+    sessionStorage.removeItem("jwt-Token");
+    localStorage.removeItem("jwt-Token");
+    localStorage.removeItem("role");
+    // Redirect to home or sign-in page
+    navigate("/authentication/sign-in"); // Change the path as needed
+  };
 
   useEffect(() => {
     // A function that sets the mini state of the sidenav.
@@ -182,14 +191,15 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
       <MDBox p={2} mt="auto">
         <MDButton
           component="a"
-          href="https://www.creative-tim.com/product/material-dashboard-pro-react"
           target="_blank"
           rel="noreferrer"
           variant="gradient"
           color={sidenavColor}
           fullWidth
+          onClick={handleLogout}
         >
-          upgrade to pro
+          <Icon sx={{ mr: 1 }}>logout</Icon>
+          Log Out
         </MDButton>
       </MDBox>
     </SidenavRoot>

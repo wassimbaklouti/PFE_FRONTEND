@@ -1,55 +1,20 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState, useEffect, useMemo } from "react";
-
-// react-router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-
-// @mui material components
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Icon from "@mui/material/Icon";
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
-
-// Material Dashboard 2 React example components
 import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
-
-// Material Dashboard 2 React themes
 import theme from "assets/theme";
 import themeRTL from "assets/theme/theme-rtl";
-
-// Material Dashboard 2 React Dark Mode themes
 import themeDark from "assets/theme-dark";
 import themeDarkRTL from "assets/theme-dark/theme-rtl";
-
-// RTL plugins
 import rtlPlugin from "stylis-plugin-rtl";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
-
-// Material Dashboard 2 React routes
 import routes from "routes";
-
-// Material Dashboard 2 React contexts
 import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "context";
-
-// Images
 import brandWhite from "assets/images/logo-ct.png";
 import brandDark from "assets/images/logo-ct-dark.png";
 
@@ -75,7 +40,6 @@ export default function App() {
       key: "rtl",
       stylisPlugins: [rtlPlugin],
     });
-
     setRtlCache(cacheRtl);
   }, []);
 
@@ -111,11 +75,14 @@ export default function App() {
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
+      const role = localStorage.getItem("role"); // Assuming this gets the user role as a string
+      console.log("role ", role);
       if (route.collapse) {
         return getRoutes(route.collapse);
       }
 
-      if (route.route) {
+      // Check if route has a role and if it matches the user's role
+      if (route.route && (!route.roles || route.roles.includes(role))) {
         return <Route exact path={route.route} element={route.component} key={route.key} />;
       }
 
@@ -152,25 +119,12 @@ export default function App() {
         <CssBaseline />
         {layout === "dashboard" && (
           <>
-            {/* Conditionally render Sidenav only if you need it */}
-            {/* Remove this block completely if you no longer need Sidenav */}
-            {/* <Sidenav
-              color={sidenavColor}
-              brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-              brandName="Material Dashboard 2"
-              routes={routes}
-              onMouseEnter={handleOnMouseEnter}
-              onMouseLeave={handleOnMouseLeave}
-            /> */}
             <Configurator />
             {configsButton}
           </>
         )}
         {layout === "vr" && <Configurator />}
-        <MDBox
-          // Set full width of the page when sidenav is not present
-          sx={{ width: "100%" }}
-        >
+        <MDBox sx={{ width: "100%" }}>
           <Routes>
             {getRoutes(routes)}
             <Route path="*" element={<Navigate to="/dashboard" />} />
@@ -183,24 +137,12 @@ export default function App() {
       <CssBaseline />
       {layout === "dashboard" && (
         <>
-          {/* Remove Sidenav here as well */}
-          {/* <Sidenav
-            color={sidenavColor}
-            brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-            brandName="Material Dashboard 2"
-            routes={routes}
-            onMouseEnter={handleOnMouseEnter}
-            onMouseLeave={handleOnMouseLeave}
-          /> */}
           <Configurator />
           {configsButton}
         </>
       )}
       {layout === "vr" && <Configurator />}
-      <MDBox
-        // Set full width of the page when sidenav is not present
-        sx={{ width: "100%" }}
-      >
+      <MDBox sx={{ width: "100%" }}>
         <Routes>
           {getRoutes(routes)}
           <Route path="*" element={<Navigate to="/dashboard" />} />

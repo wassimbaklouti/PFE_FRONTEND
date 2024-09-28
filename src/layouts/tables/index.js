@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
+import Sidenav from "examples/Sidenav";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -13,6 +14,7 @@ import MenuItem from "@mui/material/MenuItem"; // Import MenuItem for select opt
 import Select from "@mui/material/Select"; // Import Select for expertise field
 import InputLabel from "@mui/material/InputLabel"; // Import InputLabel for Select label
 import FormControl from "@mui/material/FormControl"; // Import FormControl for styling
+import routes from "routes";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -169,45 +171,48 @@ function Tables() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
-      <MDBox pt={6} pb={3}>
-        <Grid container spacing={6}>
-          <Grid item xs={12}>
-            <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-              >
-                <MDTypography variant="h5" color="white">
-                  Users Table
-                </MDTypography>
-                <Button
-                  variant="contained"
-                  color="dark"
-                  onClick={handleClickOpen}
-                  style={{ float: "right" }}
+      <Sidenav color={"info"} brandName="Admin Dashboard" routes={routes} />
+      {/* <DashboardNavbar /> */}
+      <MDBox justifyContent="flex-end" ml={33}>
+        <MDBox pt={6} pb={3}>
+          <Grid container spacing={6}>
+            <Grid item xs={12}>
+              <Card>
+                <MDBox
+                  mx={2}
+                  mt={-3}
+                  py={3}
+                  px={2}
+                  variant="gradient"
+                  bgColor="info"
+                  borderRadius="lg"
+                  coloredShadow="info"
                 >
-                  Add User
-                </Button>
-              </MDBox>
-              <MDBox pt={3}>
-                <DataTable
-                  table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
-              </MDBox>
-            </Card>
+                  <MDTypography variant="h5" color="white">
+                    Users Table
+                  </MDTypography>
+                  <Button
+                    variant="contained"
+                    color="dark"
+                    onClick={handleClickOpen}
+                    style={{ float: "right" }}
+                  >
+                    Add User
+                  </Button>
+                </MDBox>
+                <MDBox pt={3}>
+                  <DataTable
+                    table={{ columns, rows }}
+                    isSorted={false}
+                    entriesPerPage={false}
+                    showTotalEntries={false}
+                    noEndBorder
+                  />
+                </MDBox>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
+        </MDBox>
       </MDBox>
       {/* <Footer /> */}
 
