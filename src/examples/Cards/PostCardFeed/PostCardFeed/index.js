@@ -4,8 +4,10 @@ import PropTypes from "prop-types";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import Avatar from "@mui/material/Avatar";
+import EditIcon from "@mui/icons-material/Edit";
 import CardContent from "@mui/material/CardContent";
 import MDBox from "components/MDBox";
+import DeleteIcon from "@mui/icons-material/Delete";
 import MDTypography from "components/MDTypography";
 import IconButton from "@mui/material/IconButton";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
@@ -29,6 +31,8 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
   const [connectedUser, setConnectedUser] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false); // Manage dialog visibility
   const [authorProfile, setAuthorProfile] = useState(null); // Author info including profile image
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState("");
 
   useEffect(() => {
     const fetchConnectedUser = async () => {
@@ -135,22 +139,63 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
   };
 
   const handleSubmitComment = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:8089/PI/api/posts/comment?postId=${postId}&username=${connectedUser.username}&content=${comment}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+    if (!editingCommentId) {
+      try {
+        const response = await fetch(
+          `http://localhost:8089/PI/api/posts/comment?postId=${postId}&username=${connectedUser.username}&content=${comment}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (response.ok) {
+          const newComment = await response.json();
+          setComments([...comments, newComment]);
+          setComment("");
         }
-      );
+      } catch (error) {
+        console.error("Error submitting the comment:", error);
+      }
+    } else {
+      handleUpdateComment(editingCommentId);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const response = await fetch(`/PI/api/posts/comments/delete/${commentId}`, {
+        method: "DELETE",
+      });
       if (response.ok) {
-        const newComment = await response.json();
-        setComments([...comments, newComment]);
-        setComment("");
+        setComments(comments.filter((c) => c.id !== commentId));
       }
     } catch (error) {
-      console.error("Error submitting the comment:", error);
+      console.error("Error deleting comment:", error);
     }
+  };
+  const handleUpdateComment = async (commentId) => {
+    try {
+      const response = await fetch(`/PI/api/posts/comments/update/${commentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: comment }),
+      });
+      if (response.ok) {
+        const updatedComment = await response.json();
+        setComments(
+          comments.map((c) => (c.id === commentId ? { ...c, content: updatedComment.content } : c))
+        );
+        setComment("");
+        setEditingCommentId(null); // Exit edit mode
+      }
+    } catch (error) {
+      console.error("Error updating comment:", error);
+    }
+  };
+  const handleEditClick = (commentId, currentContent) => {
+    setEditingCommentId(commentId);
+    setEditingContent(currentContent);
+    setComment(currentContent);
   };
 
   return (
@@ -189,6 +234,9 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
                 borderRadius: "10px",
                 maxHeight: "400px",
                 objectFit: "cover",
+                display: "block",
+                margin: "auto",
+                maxWidth: "100%",
               }}
             />
           </MDBox>
@@ -277,9 +325,45 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
 
           <MDBox mt={3}>
             {comments.map((c, index) => (
-              <MDBox key={index} mb={1}>
-                <MDTypography variant="caption">{c.username}:</MDTypography>
-                <MDTypography variant="body2">{c.content}</MDTypography>
+              <MDBox
+                key={index}
+                mb={1}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="flex-start"
+              >
+                <MDBox>
+                  <MDTypography variant="caption">{c.username}:</MDTypography>
+                  <MDTypography variant="body2">{c.content}</MDTypography>
+                </MDBox>
+                {connectedUser?.username === c.username && (
+                  <MDBox display="flex" justifyContent="flex-end" alignItems="center">
+                    <IconButton
+                      onClick={() => handleEditClick(c.id, c.content)}
+                      sx={{
+                        marginLeft: "auto",
+                        color: "inherit", // Default color
+                        "&:hover": {
+                          color: "blue", // Change color to red on hover
+                        },
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDeleteComment(c.id)}
+                      sx={{
+                        marginLeft: "auto",
+                        color: "inherit", // Default color
+                        "&:hover": {
+                          color: "red", // Change color to red on hover
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </MDBox>
+                )}
               </MDBox>
             ))}
           </MDBox>

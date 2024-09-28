@@ -8,6 +8,7 @@ import Icon from "@mui/material/Icon";
 import Typography from "@mui/material/Typography";
 import MDBox from "components/MDBox";
 import MDInput from "components/MDInput";
+import Avatar from "@mui/material/Avatar";
 import { navbar, navbarContainer, navbarIconButton } from "examples/Navbars/DashboardNavbar/styles";
 import {
   useMaterialUIController,
@@ -66,6 +67,15 @@ function DashboardNavbar({ absolute, light, isMini }) {
         justifyContent="space-between" // Align icons in the center and search field to the right
         alignItems="center"
       >
+        <Avatar
+          //alt={author}
+          src={"/static/images/avatar/1.jpg"} // Fetched profile image
+          sx={{
+            width: 60,
+            height: 60,
+            marginLeft: 2,
+          }}
+        />
         {/* Centered Section: Icons and Text */}
         <MDBox
           display="flex"
@@ -73,7 +83,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
           justifyContent="center"
           flexGrow={1}
           gap={5}
-          sx={{ ml: 45 }}
+          sx={{ ml: 40 }}
         >
           {/* Conditional Rendering based on Token */}
           <Link to="/dashboard">
