@@ -22,6 +22,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentNavbar, fixedNavbar, darkMode } = controller;
   const navigate = useNavigate();
+  const location = useLocation();
   const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
 
   useEffect(() => {
@@ -55,6 +56,20 @@ function DashboardNavbar({ absolute, light, isMini }) {
     marginRight: "8px", // Space between icon and text
   };
 
+  const activeStyle = {
+    color: "#2881ea",
+    // fontSize: "1.5rem",
+    transform: "scale(1.1)",
+  };
+
+  const iconButtonStyle = {
+    fontSize: "1.5rem",
+    transition: "transform 0.2s ease-in-out",
+    "&:hover": {
+      transform: "scale(1.1)", // Slightly enlarges the button on hover
+    },
+  };
+
   return (
     <AppBar
       position={absolute ? "absolute" : navbarType}
@@ -68,14 +83,20 @@ function DashboardNavbar({ absolute, light, isMini }) {
         alignItems="center"
       >
         <Avatar
-          //alt={author}
           src={"/static/images/avatar/1.jpg"} // Fetched profile image
           sx={{
             width: 60,
             height: 60,
             marginLeft: 2,
+            transition: "transform 0.3s ease-in-out", // Smooth transition for scaling
+            "&:hover": {
+              transform: "scale(1.2)", // Grows the avatar on hover
+              cursor: "pointer", // Changes the cursor to pointer on hover
+            },
           }}
+          onClick={() => navigate("/dashboard")} // Navigates to home when clicked
         />
+
         {/* Centered Section: Icons and Text */}
         <MDBox
           display="flex"
@@ -88,9 +109,22 @@ function DashboardNavbar({ absolute, light, isMini }) {
           {/* Conditional Rendering based on Token */}
           <Link to="/dashboard">
             <MDBox display="flex" alignItems="center">
-              <IconButton sx={navbarIconButton} size="large" disableRipple>
+              <IconButton
+                sx={{
+                  ...iconButtonStyle,
+                  ...(location.pathname === "/dashboard" && activeStyle),
+                }}
+                size="large"
+                disableRipple
+              >
                 <Icon sx={iconsStyle}>home</Icon>
-                <Typography variant="h6" sx={{ fontSize: "1.25rem" }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: "1.25rem",
+                    ...(location.pathname === "/dashboard" && activeStyle),
+                  }}
+                >
                   Home
                 </Typography>
               </IconButton>
@@ -101,9 +135,22 @@ function DashboardNavbar({ absolute, light, isMini }) {
             <>
               <Link to="/profile">
                 <MDBox display="flex" alignItems="center">
-                  <IconButton sx={navbarIconButton} size="large" disableRipple>
+                  <IconButton
+                    sx={{
+                      ...iconButtonStyle,
+                      ...(location.pathname === "/profile" && activeStyle),
+                    }}
+                    size="large"
+                    disableRipple
+                  >
                     <Icon sx={iconsStyle}>account_circle</Icon>
-                    <Typography variant="h6" sx={{ fontSize: "1.25rem" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "1.25rem",
+                        ...(location.pathname === "/profile" && activeStyle),
+                      }}
+                    >
                       Profile
                     </Typography>
                   </IconButton>
@@ -112,9 +159,22 @@ function DashboardNavbar({ absolute, light, isMini }) {
 
               <Link to="/posts">
                 <MDBox display="flex" alignItems="center">
-                  <IconButton sx={navbarIconButton} size="large" disableRipple>
+                  <IconButton
+                    sx={{
+                      ...iconButtonStyle,
+                      ...(location.pathname === "/posts" && activeStyle),
+                    }}
+                    size="large"
+                    disableRipple
+                  >
                     <Icon sx={iconsStyle}>article</Icon>
-                    <Typography variant="h6" sx={{ fontSize: "1.25rem" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "1.25rem",
+                        ...(location.pathname === "/posts" && activeStyle),
+                      }}
+                    >
                       Posts
                     </Typography>
                   </IconButton>
@@ -123,7 +183,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
 
               <MDBox display="flex" alignItems="center">
                 <IconButton
-                  sx={navbarIconButton}
+                  sx={iconButtonStyle}
                   size="large"
                   disableRipple
                   onClick={handleLogout} // Attach logout handler
@@ -139,9 +199,22 @@ function DashboardNavbar({ absolute, light, isMini }) {
             <>
               <Link to="/authentication/sign-in">
                 <MDBox display="flex" alignItems="center">
-                  <IconButton sx={navbarIconButton} size="large" disableRipple>
+                  <IconButton
+                    sx={{
+                      ...iconButtonStyle,
+                      ...(location.pathname === "/authentication/sign-in" && activeStyle),
+                    }}
+                    size="large"
+                    disableRipple
+                  >
                     <Icon sx={iconsStyle}>login</Icon>
-                    <Typography variant="h6" sx={{ fontSize: "1.25rem" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "1.25rem",
+                        ...(location.pathname === "/authentication/sign-in" && activeStyle),
+                      }}
+                    >
                       Sign In
                     </Typography>
                   </IconButton>
@@ -150,9 +223,22 @@ function DashboardNavbar({ absolute, light, isMini }) {
 
               <Link to="/authentication/sign-up">
                 <MDBox display="flex" alignItems="center">
-                  <IconButton sx={navbarIconButton} size="large" disableRipple>
+                  <IconButton
+                    sx={{
+                      ...iconButtonStyle,
+                      ...(location.pathname === "/authentication/sign-up" && activeStyle),
+                    }}
+                    size="large"
+                    disableRipple
+                  >
                     <Icon sx={iconsStyle}>person_add</Icon>
-                    <Typography variant="h6" sx={{ fontSize: "1.25rem" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "1.25rem",
+                        ...(location.pathname === "/authentication/sign-up" && activeStyle),
+                      }}
+                    >
                       Sign Up
                     </Typography>
                   </IconButton>
@@ -167,7 +253,13 @@ function DashboardNavbar({ absolute, light, isMini }) {
           <MDBox sx={{ marginLeft: "auto" }}>
             <MDInput
               label="Search here"
-              sx={{ width: "400px" }} // Widened search field
+              sx={{
+                width: "400px", // Default width
+                transition: "width 0.3s ease-in-out", // Smooth transition
+                "&:hover": {
+                  width: "500px", // Width when hovered
+                },
+              }}
             />
           </MDBox>
         )}

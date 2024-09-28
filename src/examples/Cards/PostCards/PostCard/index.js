@@ -18,7 +18,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 
-function PostCard({ postId, image, title, content, username }) {
+function PostCard({ postId, image, title, content, username, onDeletePost }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState(title);
   const [originalTitle, setOriginalTitle] = useState(title);
@@ -69,7 +69,7 @@ function PostCard({ postId, image, title, content, username }) {
     try {
       const response = await axios.delete(`/PI/api/posts/delete-post/${postId}`);
       console.log("Post deleted successfully:", response.data);
-
+      onDeletePost();
       // Optionally, you can add logic to remove the post from the UI after deletion,
       // such as navigating away, showing a confirmation message, etc.
     } catch (error) {
@@ -175,6 +175,7 @@ PostCard.propTypes = {
   title: PropTypes.string.isRequired,
   content: PropTypes.string.isRequired,
   username: PropTypes.string.isRequired,
+  onDeletePost: PropTypes.func,
 };
 
 export default PostCard;

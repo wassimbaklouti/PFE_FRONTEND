@@ -18,7 +18,17 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 
-function BuildingCard({ buildingId, image, type, address, rooms, price, area, owner }) {
+function BuildingCard({
+  buildingId,
+  image,
+  type,
+  address,
+  rooms,
+  price,
+  area,
+  owner,
+  onDeletePost,
+}) {
   const [openDialog, setOpenDialog] = useState(false);
   const [updatedType, setUpdatedType] = useState(type);
   const [originalType, setOriginalType] = useState(type);
@@ -129,6 +139,7 @@ function BuildingCard({ buildingId, image, type, address, rooms, price, area, ow
     try {
       const response = await axios.delete(`/PI/api/buildings/${buildingId}`); // Updated URL
       console.log("Building deleted successfully:", response.data);
+      onDeletePost();
     } catch (error) {
       console.error("Error deleting building:", error);
     }
@@ -271,6 +282,7 @@ BuildingCard.propTypes = {
   rooms: PropTypes.number.isRequired,
   price: PropTypes.number.isRequired,
   area: PropTypes.number.isRequired,
+  onDeletePost: PropTypes.func,
   owner: PropTypes.shape({
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired,

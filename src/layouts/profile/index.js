@@ -43,6 +43,7 @@ function Overview() {
   const [connectedUser, setConnectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [refrech, setRefrech] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -130,6 +131,28 @@ function Overview() {
     }
   };
 
+  const fetchPosts = async () => {
+    // await fetchConnectedUser();
+    console.log("connected user ya l wess : ", connectedUser);
+    if (connectedUser) {
+      const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+      const postsResponse = await fetch(`/PI/api/posts/user/${connectedUser.username}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (postsResponse.ok) {
+        const postsData = await postsResponse.json();
+        setPosts(postsData);
+      } else {
+        console.error("Failed to fetch posts");
+      }
+    }
+  };
+
   const fetchProfile = async () => {
     // await fetchConnectedUser();
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
@@ -151,21 +174,6 @@ function Overview() {
         role: connectedUser.role || "",
         currentUsername: connectedUser.username || "",
       });
-
-      const postsResponse = await fetch(`/PI/api/posts/user/${connectedUser.username}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (postsResponse.ok) {
-        const postsData = await postsResponse.json();
-        setPosts(postsData);
-      } else {
-        console.error("Failed to fetch posts");
-      }
       setLoading(false);
     }
   };
@@ -193,9 +201,10 @@ function Overview() {
   useEffect(() => {
     //fetchConnectedUser();
     fetchProfile();
+    fetchPosts();
     fetchBuilding();
     fetchCities();
-  }, [connectedUser]);
+  }, [connectedUser, refrech]);
 
   const handleEdit = () => {
     setEditMode(true);
@@ -324,6 +333,14 @@ function Overview() {
     }
   };
 
+  const handleRefrech = () => {
+    if (refrech) {
+      setRefrech(false);
+    } else {
+      setRefrech(true);
+    }
+  };
+
   const handleFormChange = (event, newValue) => {
     setActiveForm(newValue); // Update the active form when the tab is clicked
   };
@@ -448,6 +465,22 @@ function Overview() {
                     >
                       <MDBox component="form" onSubmit={handleSubmit}>
                         <MDTypography variant="h6">Edit Profile</MDTypography>
+                        <TextField
+                          label="Firstname"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          fullWidth
+                          margin="normal"
+                        />
+                        <TextField
+                          label="Lastname"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          fullWidth
+                          margin="normal"
+                        />
                         <TextField
                           label="Username"
                           name="username"
@@ -585,7 +618,7 @@ function Overview() {
                     {/* Conditional Rendering Based on Active Tab */}
                     {activeForm === "post" && (
                       <MDBox component="form" onSubmit={handleNewPostSubmit} p={2}>
-                        <MDTypography variant="h6">Add New Post</MDTypography>
+                        <MDTypography variant="h5">Add New Post</MDTypography>
                         <TextField
                           label="Title"
                           name="title"
@@ -616,7 +649,7 @@ function Overview() {
 
                     {activeForm === "building" && (
                       <MDBox component="form" onSubmit={handleNewBuildingSubmit} p={2}>
-                        <MDTypography variant="h6">Add New Building</MDTypography>
+                        <MDTypography variant="h5">Add New Building</MDTypography>
                         <TextField
                           label="Type"
                           name="type"
@@ -676,7 +709,7 @@ function Overview() {
                     px={2}
                     pb={2}
                   >
-                    <MDTypography variant="h6" sx={{ marginBottom: "16px" }}>
+                    <MDTypography variant="h5" sx={{ marginBottom: "16px" }}>
                       Billing Info
                     </MDTypography>
                     <MasterCard
@@ -704,6 +737,7 @@ function Overview() {
                       title={post.title}
                       content={post.content}
                       username={post.username}
+                      onDeletePost={handleRefrech}
                       action={{
                         type: "internal",
                         route: `/posts/${post.id}`,
@@ -740,6 +774,7 @@ function Overview() {
                         price={building.price}
                         area={building.area}
                         owner={building.owner}
+                        onDeletePost={handleRefrech}
                       />
                     </Grid>
                   ))
