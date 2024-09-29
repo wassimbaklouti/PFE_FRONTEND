@@ -40,7 +40,10 @@ import Dashboard from "layouts/dashboard";
 import DashboardAdmin from "layouts/dashboardAdmin";
 import Posts from "layouts/posts";
 import PostsAdmin from "layouts/postsAdmin";
-import Tables from "layouts/tables";
+import TablesAdmin from "layouts/tablesAdmin";
+import TablesPropertyowner from "layouts/tablesProertyowner";
+import TablesHandyman from "layouts/tablesHandyman";
+import TablesUser from "layouts/tablesUser";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -84,11 +87,38 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Tables",
-    key: "tables",
-    icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
-    component: <Tables />,
+    name: "Admins",
+    key: "TablesAdmin",
+    icon: <Icon fontSize="small">admin_panel_settings</Icon>,
+    route: "/TablesAdmin",
+    component: <TablesAdmin />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "collapse",
+    name: "Users",
+    key: "TablesUser",
+    icon: <Icon fontSize="small">people</Icon>,
+    route: "/TablesUser",
+    component: <TablesUser />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "collapse",
+    name: "Handymans",
+    key: "TablesHandyman",
+    icon: <Icon fontSize="small">handyman</Icon>,
+    route: "/TablesHandyman",
+    component: <TablesHandyman />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "collapse",
+    name: "Propretyowners",
+    key: "TablesPropertyowner",
+    icon: <Icon fontSize="small">house</Icon>,
+    route: "/TablesPropertyowner",
+    component: <TablesPropertyowner />,
     roles: ["ROLE_ADMIN"],
   },
   {

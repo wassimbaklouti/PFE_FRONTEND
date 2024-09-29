@@ -16,7 +16,7 @@ import defaultImage from "assets/images/team-1.jpg"; // Assurez-vous d'avoir une
 function Houses() {
   const [houses, setHouses] = useState([]);
   const [filteredHouses, setFilteredHouses] = useState([]);
-
+  const role = localStorage.getItem("role");
   // Fetch Houses data
   useEffect(() => {
     fetch("http://localhost:8089/PI/api/buildings") // Votre endpoint API
@@ -38,7 +38,7 @@ function Houses() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Houses List

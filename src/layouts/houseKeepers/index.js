@@ -25,7 +25,7 @@ function HouseKeepers() {
   const [filteredHouseKeepers, setFilteredHouseKeepers] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-
+  const role = localStorage.getItem("role");
   // Fetch HouseKeepers data
   useEffect(() => {
     fetch("http://localhost:8089/PI/handymen/houseKeeper") // Votre endpoint API
@@ -76,7 +76,7 @@ function HouseKeepers() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           HouseKeepers List

@@ -27,7 +27,7 @@ import MDButton from "components/MDButton";
 // Fetch function to get user data
 const fetchUserData = async () => {
   try {
-    const response = await fetch("/PI/list/admin");
+    const response = await fetch("/PI/list/handyman");
     if (response.ok) {
       const data = await response.json();
       return data;
@@ -150,7 +150,7 @@ export default function data() {
     ),
     action: (
       <MDBox display="flex" alignItems="center">
-        <MDTypography
+        {/* <MDTypography
           component="a"
           href="#"
           variant="caption"
@@ -159,7 +159,7 @@ export default function data() {
           style={{ marginRight: 8 }}
         >
           Edit
-        </MDTypography>
+        </MDTypography> */}
         <MDButton
           variant="text"
           color="error"

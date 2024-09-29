@@ -25,6 +25,7 @@ function BabySitters() {
   const [filteredBabySitters, setFilteredBabySitters] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const role = localStorage.getItem("role");
 
   // Fetch BabySitters data
   useEffect(() => {
@@ -76,7 +77,7 @@ function BabySitters() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           BabySitters List

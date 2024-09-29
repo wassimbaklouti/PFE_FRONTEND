@@ -25,7 +25,7 @@ function Carpenters() {
   const [filteredCarpenters, setFilteredCarpenters] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-
+  const role = localStorage.getItem("role");
   // Fetch Carpenters data
   useEffect(() => {
     fetch("http://localhost:8089/PI/handymen/carpenter") // Votre endpoint API
@@ -76,7 +76,7 @@ function Carpenters() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Carpenters List

@@ -28,6 +28,7 @@ function BuildingCard({
   area,
   owner,
   onDeletePost,
+  onUpdatePost,
 }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [updatedType, setUpdatedType] = useState(type);
@@ -116,6 +117,7 @@ function BuildingCard({
       });
 
       console.log("Building updated successfully:", response.data);
+      onUpdatePost();
       handleClose();
 
       // Update original values with new values after successful update
@@ -283,6 +285,7 @@ BuildingCard.propTypes = {
   price: PropTypes.number.isRequired,
   area: PropTypes.number.isRequired,
   onDeletePost: PropTypes.func,
+  onUpdatePost: PropTypes.func,
   owner: PropTypes.shape({
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired,

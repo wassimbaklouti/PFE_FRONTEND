@@ -25,7 +25,7 @@ function HomeApplianceTechnicians() {
   const [filteredHomeApplianceTechnicians, setFilteredHomeApplianceTechnicians] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-
+  const role = localStorage.getItem("role");
   // Fetch HomeApplianceTechnicians data
   useEffect(() => {
     fetch("http://localhost:8089/PI/handymen/homeApplianceTechnician") // Votre endpoint API
@@ -78,7 +78,7 @@ function HomeApplianceTechnicians() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           HomeApplianceTechnicians List

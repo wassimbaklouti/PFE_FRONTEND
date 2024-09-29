@@ -150,7 +150,7 @@ export default function data() {
     ),
     action: (
       <MDBox display="flex" alignItems="center">
-        <MDTypography
+        {/* <MDTypography
           component="a"
           href="#"
           variant="caption"
@@ -159,7 +159,7 @@ export default function data() {
           style={{ marginRight: 8 }}
         >
           Edit
-        </MDTypography>
+        </MDTypography> */}
         <MDButton
           variant="text"
           color="error"

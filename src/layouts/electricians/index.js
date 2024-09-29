@@ -25,7 +25,7 @@ function Electricians() {
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedElectrician, setSelectedElectrician] = useState(null); // State for dialog
-
+  const role = localStorage.getItem("role");
   // Fetch Electricians data
   useEffect(() => {
     fetch("http://localhost:8089/PI/handymen/electrician")
@@ -79,7 +79,7 @@ function Electricians() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Electricians List

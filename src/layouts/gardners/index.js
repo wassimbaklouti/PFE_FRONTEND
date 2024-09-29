@@ -25,7 +25,7 @@ function Gardners() {
   const [filteredGardners, setFilteredGardners] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-
+  const role = localStorage.getItem("role");
   // Fetch Gardners data
   useEffect(() => {
     fetch("http://localhost:8089/PI/handymen/gardner") // Votre endpoint API
@@ -76,7 +76,7 @@ function Gardners() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {role !== "ROLE_ADMIN" && <DashboardNavbar />}
       <MDBox pt={6} px={3}>
         <MDTypography variant="h4" fontWeight="medium">
           Gardners List

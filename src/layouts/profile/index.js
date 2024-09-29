@@ -712,12 +712,16 @@ function Overview() {
                     <MDTypography variant="h5" sx={{ marginBottom: "16px" }}>
                       Billing Info
                     </MDTypography>
-                    <MasterCard
-                      number={4562112245947852}
-                      holder={`${connectedUser.firstName} ${connectedUser.lastName}`}
-                      expires="11/22"
-                      sx={{ marginTop: "24px" }}
-                    />
+                    <MDBox onClick={handleClickOpen} sx={{ cursor: "pointer", width: "100%" }}>
+                      <MasterCard
+                        number={`${
+                          connectedUser.cardnumber ? connectedUser.cardnumber : "****************"
+                        }`}
+                        holder={`${connectedUser.firstName} ${connectedUser.lastName}`}
+                        expires={`${connectedUser.cardexpire ? connectedUser.cardexpire : "**/**"}`}
+                        sx={{ marginTop: "24px" }}
+                      />
+                    </MDBox>
                   </MDBox>
                 </Card>
               </Grid>
@@ -775,6 +779,7 @@ function Overview() {
                         area={building.area}
                         owner={building.owner}
                         onDeletePost={handleRefrech}
+                        onUpdatePost={handleRefrech}
                       />
                     </Grid>
                   ))
