@@ -68,6 +68,8 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     sessionStorage.removeItem("jwt-Token");
     localStorage.removeItem("jwt-Token");
     localStorage.removeItem("role");
+    localStorage.clear();
+    sessionStorage.clear();
     // Redirect to home or sign-in page
     navigate("/authentication/sign-in"); // Change the path as needed
   };

@@ -46,11 +46,15 @@ function Basic() {
           localStorage.clear();
           localStorage.setItem("role", role);
           localStorage.setItem("jwt-Token", token);
+          localStorage.setItem("connected-user", JSON.stringify(result));
+          localStorage.setItem("profile-image", result.profileImageUrl);
         } else {
           localStorage.clear();
           sessionStorage.clear();
           sessionStorage.setItem("jwt-Token", token);
           localStorage.setItem("role", role);
+          localStorage.setItem("profile-image", result.profileImageUrl);
+          localStorage.setItem("connected-user", JSON.stringify(result));
         }
 
         // Role-based redirection

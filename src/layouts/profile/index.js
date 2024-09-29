@@ -11,6 +11,7 @@ import MasterCard from "examples/Cards/MasterCard";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -77,7 +78,47 @@ function Overview() {
       email: "",
     },
   });
+  const [open, setOpen] = useState(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpire, setCardExpire] = useState("");
+  const [refresh, setrefresh] = useState(false);
+  const handleClickOpen = () => {
+    if (connectedUser.cardnumber && connectedUser.cardexpire) {
+      setCardNumber(connectedUser.cardnumber);
+      setCardExpire(connectedUser.cardexpire);
+    }
+    setOpen(true);
+  };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSave = () => {
+    // Using fetch to call the backend
+    fetch(
+      `/PI/update-card?username=${connectedUser.username}&cardnumber=${cardNumber}&cardexpire=${cardExpire}`,
+      {
+        method: "PUT",
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update card info");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Handle success (e.g., show a notification or update local state)
+        console.log("Card info updated successfully", data);
+        setrefresh(!refresh);
+        setOpen(false); // Close dialog after saving
+      })
+      .catch((error) => {
+        // Handle error (e.g., show an error notification)
+        console.error("Error:", error);
+      });
+  };
   const [posts, setPosts] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [activeForm, setActiveForm] = useState("post"); // To toggle between post and building form
@@ -196,7 +237,7 @@ function Overview() {
 
   useEffect(() => {
     fetchConnectedUser();
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     //fetchConnectedUser();
@@ -724,6 +765,35 @@ function Overview() {
                     </MDBox>
                   </MDBox>
                 </Card>
+                <Dialog open={open} onClose={handleClose}>
+                  <DialogTitle>Update Card Information</DialogTitle>
+                  <DialogContent>
+                    <TextField
+                      margin="dense"
+                      label="Card Number"
+                      fullWidth
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                      variant="outlined"
+                    />
+                    <TextField
+                      margin="dense"
+                      label="Expiration Date"
+                      fullWidth
+                      value={cardExpire}
+                      onChange={(e) => setCardExpire(e.target.value)}
+                      variant="outlined"
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSave} color="primary">
+                      Save
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </Grid>
             </Grid>
           </MDBox>

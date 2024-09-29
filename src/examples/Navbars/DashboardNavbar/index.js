@@ -24,6 +24,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const navigate = useNavigate();
   const location = useLocation();
   const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+  const profileimage = localStorage.getItem("profile-image");
 
   useEffect(() => {
     if (fixedNavbar) {
@@ -48,6 +49,9 @@ function DashboardNavbar({ absolute, light, isMini }) {
     sessionStorage.removeItem("jwt-Token");
     localStorage.removeItem("jwt-Token");
     localStorage.removeItem("role");
+    localStorage.removeItem("profile-image");
+    localStorage.clear();
+    sessionStorage.clear();
     // Redirect to home or sign-in page
     navigate("/authentication/sign-in"); // Change the path as needed
   };
@@ -84,18 +88,21 @@ function DashboardNavbar({ absolute, light, isMini }) {
         alignItems="center"
       >
         <Avatar
-          src={"/static/images/avatar/1.jpg"} // Fetched profile image
+          src={profileimage} // Fetched profile image
           sx={{
             width: 60,
             height: 60,
             marginLeft: 2,
+            // border: "3px solid #fff", // Round frame with white border
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)", // Shadow effect
+            borderRadius: "50%", // Ensures the avatar stays round
             transition: "transform 0.3s ease-in-out", // Smooth transition for scaling
             "&:hover": {
               transform: "scale(1.2)", // Grows the avatar on hover
               cursor: "pointer", // Changes the cursor to pointer on hover
             },
           }}
-          onClick={() => navigate("/dashboard")} // Navigates to home when clicked
+          onClick={() => navigate("/profile")} // Navigates to home when clicked
         />
 
         {/* Centered Section: Icons and Text */}

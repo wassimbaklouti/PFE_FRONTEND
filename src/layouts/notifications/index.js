@@ -39,6 +39,7 @@ function CheckoutForm() {
     }
 
     const cardElement = elements.getElement(CardElement);
+    console.log("Card Element:", cardElement);
 
     try {
       // Call your backend to create a PaymentIntent
@@ -54,7 +55,7 @@ function CheckoutForm() {
       }
 
       const { clientSecret } = await response.json();
-
+      console.log("Card Element:", cardElement);
       // Confirm the payment with the clientSecret
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
