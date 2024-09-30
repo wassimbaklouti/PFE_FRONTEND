@@ -5,7 +5,13 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import defaultImage from "assets/images/team-1.jpg"; // Default image
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+  CardNumberElement,
+} from "@stripe/react-stripe-js";
 
 // Load Stripe (replace with your own public key)
 const stripePromise = loadStripe(
@@ -17,7 +23,7 @@ function BuildingCardFeed({ building }) {
   const [openBookingForm, setOpenBookingForm] = useState(false);
   const [openStripe, setOpenStripe] = useState(false);
   const [entryDate, setEntryDate] = useState("");
-  const [leaveDate, setLeaveDate] = useState("");
+  const [exitDate, setExitDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -49,7 +55,7 @@ function BuildingCardFeed({ building }) {
     }
 
     const cardElement = elements.getElement(CardElement);
-    console.log("Card Element:", cardElement);
+    console.log("Element:", elements.getElement(CardNumberElement));
 
     try {
       // Call your backend to create a PaymentIntent
@@ -94,10 +100,10 @@ function BuildingCardFeed({ building }) {
 
   const submitReservation = async () => {
     try {
-      const response = await fetch(`/PI/buildings/${building.id}/reserve`, {
+      const response = await fetch(`/PI/api/buildings/${building.id}/reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entryDate, leaveDate }),
+        body: JSON.stringify({ entryDate, exitDate, userId }),
       });
 
       if (!response.ok) {
@@ -113,6 +119,7 @@ function BuildingCardFeed({ building }) {
   };
 
   const connectedUser = JSON.parse(localStorage.getItem("connected-user"));
+  const userId = connectedUser.id;
 
   return (
     <div>
@@ -185,8 +192,8 @@ function BuildingCardFeed({ building }) {
           <TextField
             label="Leave Date"
             type="date"
-            value={leaveDate}
-            onChange={(e) => setLeaveDate(e.target.value)}
+            value={exitDate}
+            onChange={(e) => setExitDate(e.target.value)}
             fullWidth
             InputLabelProps={{
               shrink: true,
@@ -204,33 +211,33 @@ function BuildingCardFeed({ building }) {
         <Dialog open={openStripe} onClose={() => setOpenStripe(false)} fullWidth maxWidth="md">
           <MDBox p={4}>
             <MDTypography variant="h6">Payment</MDTypography>
-            <Elements stripe={stripePromise}>
-              <form onSubmit={handleSubmitPayment}>
-                <MDBox mb={2}>
-                  <CardElement options={{ hidePostalCode: true }} />
-                </MDBox>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  disabled={!stripe || loading}
-                >
-                  {loading ? "Processing..." : `Pay ${building.price} €`}
-                </Button>
+            {/* <Elements stripe={stripePromise}> */}
+            <form onSubmit={handleSubmitPayment}>
+              <MDBox mb={2}>
+                <CardElement options={{ hidePostalCode: true }} />
+              </MDBox>
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                disabled={!stripe || loading}
+              >
+                {loading ? "Processing..." : `Pay ${building.price} €`}
+              </Button>
 
-                {/* Display success or error messages */}
-                {paymentSuccess && (
-                  <MDTypography variant="body2" color="success" mt={2}>
-                    Payment succeeded!
-                  </MDTypography>
-                )}
-                {errorMessage && (
-                  <MDTypography variant="body2" color="error" mt={2}>
-                    {errorMessage}
-                  </MDTypography>
-                )}
-              </form>
-            </Elements>
+              {/* Display success or error messages */}
+              {paymentSuccess && (
+                <MDTypography variant="body2" color="success" mt={2}>
+                  Payment succeeded!
+                </MDTypography>
+              )}
+              {errorMessage && (
+                <MDTypography variant="body2" color="error" mt={2}>
+                  {errorMessage}
+                </MDTypography>
+              )}
+            </form>
+            {/* </Elements> */}
           </MDBox>
         </Dialog>
       )}
