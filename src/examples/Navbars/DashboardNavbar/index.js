@@ -27,6 +27,25 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const profileimage = localStorage.getItem("profile-image");
   const [searchTerm, setSearchTerm] = useState(""); // État pour la recherche
   const [suggestions, setSuggestions] = useState([]); // État pour les suggestions d'autocomplétion
+  const [isFocused, setIsFocused] = useState(false);
+  const [blurTimer, setBlurTimer] = useState(null);
+
+  const handleBlur = () => {
+    // Set a timer for 3 seconds to set isFocused to false
+    const timer = setTimeout(() => {
+      setIsFocused(false);
+    }, 3000);
+
+    setBlurTimer(timer); // Save the timer ID
+  };
+
+  useEffect(() => {
+    return () => {
+      if (blurTimer) {
+        clearTimeout(blurTimer);
+      }
+    };
+  }, [blurTimer]);
 
   useEffect(() => {
     if (fixedNavbar) {
@@ -95,6 +114,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   };
 
   const handleSuggestionClick = (username) => {
+    console.log("hello wassim");
     setSearchTerm(username); // Mettez à jour le champ de recherche
     setSuggestions([]); // Réinitialisez les suggestions
     // Naviguez vers la page appropriée en fonction de l'expertise
@@ -103,7 +123,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
       .then((data) => {
         const expertise = data.expertise; // Assurez-vous d'adapter cela à votre structure de données
         console.log("expertise :", expertise);
-        navigate(`/layouts/${expertise}s`); // Redirigez vers la page d'expertise
+        navigate(`/${expertise}s?username=${username}`); // Redirigez vers la page d'expertise
       })
       .catch((error) => console.error("Erreur de récupération des données du handyman:", error));
   };
@@ -316,23 +336,43 @@ function DashboardNavbar({ absolute, light, isMini }) {
         {!isMini && (
           <MDBox sx={{ marginLeft: "auto" }}>
             <MDInput
-              label="Search here"
+              label="Search handyman here"
               sx={{
                 width: "400px",
                 transition: "width 0.3s ease-in-out",
                 "&:hover": {
                   width: "500px",
                 },
+                "&:focus-within": {
+                  width: "500px", // Maintains the hover width while typing
+                },
               }}
               value={searchTerm}
               onChange={handleSearchChange}
+              onFocus={() => setIsFocused(true)} // Set focus to true
+              onBlur={handleBlur} // Set focus to false
             />
-            {suggestions.length > 0 && (
-              <MDBox sx={{ position: "absolute", zIndex: 1000, bgcolor: "white", boxShadow: 3 }}>
+            {isFocused && suggestions.length > 0 && (
+              <MDBox
+                sx={{
+                  position: "absolute",
+                  zIndex: 1000,
+                  backgroundColor: "white",
+                  boxShadow: 3,
+                  width: "500px",
+                  borderRadius: 1, // Optional: add border-radius for rounded corners
+                  border: "1px solid lightgray",
+                }}
+              >
                 {suggestions.map((username) => (
                   <MDBox
                     key={username}
-                    sx={{ padding: 1, cursor: "pointer" }}
+                    sx={{
+                      padding: 1,
+                      cursor: "pointer",
+                      width: "100%",
+                      backgroundColor: "#f0f2f5",
+                    }}
                     onClick={() => handleSuggestionClick(username)}
                   >
                     {username}

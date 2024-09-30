@@ -6,7 +6,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Tooltip from "@mui/material/Tooltip";
 import Rating from "@mui/material/Rating";
 import axios from "axios"; // To make HTTP requests
-
+import { useLocation } from "react-router-dom";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
@@ -34,6 +34,9 @@ function DefaultProjectCard({
   const [connectedUser, setConnectedUser] = useState(null);
   const [showRatingSection, setShowRatingSection] = useState(false); // To toggle the rating section
   const [openDialog, setOpenDialog] = useState(false); // State to control dialog open/close
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const selectedUsername = query.get("username");
 
   // Function to submit or update the rating
   const submitRating = async (newRating) => {
@@ -121,6 +124,9 @@ function DefaultProjectCard({
   useEffect(() => {
     fetchConnectedUser();
     fetchOverallRating(); // Fetch overall rating when component mounts
+    if (selectedUsername == handymanUsername) {
+      setOpenDialog(true);
+    }
   }, [handymanUsername]);
 
   // const renderAuthors = authors.map(({ image: media, name }) => (
