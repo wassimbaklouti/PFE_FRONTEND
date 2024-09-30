@@ -194,7 +194,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
 
           {token ? ( // If token exists, show Profile and Posts
             <>
-              <Link to="/profile">
+              {/* <Link to="/profile">
                 <MDBox display="flex" alignItems="center">
                   <IconButton
                     sx={{
@@ -216,7 +216,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
                     </Typography>
                   </IconButton>
                 </MDBox>
-              </Link>
+              </Link> */}
 
               <Link to="/posts">
                 <MDBox display="flex" alignItems="center">
@@ -237,6 +237,30 @@ function DashboardNavbar({ absolute, light, isMini }) {
                       }}
                     >
                       Posts
+                    </Typography>
+                  </IconButton>
+                </MDBox>
+              </Link>
+
+              <Link to="/houses">
+                <MDBox display="flex" alignItems="center">
+                  <IconButton
+                    sx={{
+                      ...iconButtonStyle,
+                      ...(location.pathname === "/houses" && activeStyle),
+                    }}
+                    size="large"
+                    disableRipple
+                  >
+                    <Icon sx={iconsStyle}>apartment</Icon>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "1.25rem",
+                        ...(location.pathname === "/houses" && activeStyle),
+                      }}
+                    >
+                      Houses
                     </Typography>
                   </IconButton>
                 </MDBox>
