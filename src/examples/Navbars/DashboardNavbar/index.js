@@ -25,6 +25,8 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const location = useLocation();
   const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
   const profileimage = localStorage.getItem("profile-image");
+  const [searchTerm, setSearchTerm] = useState(""); // État pour la recherche
+  const [suggestions, setSuggestions] = useState([]); // État pour les suggestions d'autocomplétion
 
   useEffect(() => {
     if (fixedNavbar) {
@@ -73,6 +75,37 @@ function DashboardNavbar({ absolute, light, isMini }) {
     "&:hover": {
       transform: "scale(1.1)", // Slightly enlarges the button on hover
     },
+  };
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    if (value.length > 2) {
+      // Vous pouvez ajuster le seuil
+      fetch(`http://localhost:8089/PI/handymen/search?username=${value}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const usernames = data.map((handyman) => handyman.username); // Remplacez par votre logique d'extraction
+          setSuggestions(usernames);
+        })
+        .catch((error) => console.error("Erreur de recherche:", error));
+    } else {
+      setSuggestions([]); // Réinitialisez les suggestions si le champ est vide ou trop court
+    }
+  };
+
+  const handleSuggestionClick = (username) => {
+    setSearchTerm(username); // Mettez à jour le champ de recherche
+    setSuggestions([]); // Réinitialisez les suggestions
+    // Naviguez vers la page appropriée en fonction de l'expertise
+    fetch(`http://localhost:8089/PI/handymen/${username}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const expertise = data.expertise; // Assurez-vous d'adapter cela à votre structure de données
+        console.log("expertise :", expertise);
+        navigate(`/layouts/${expertise}s`); // Redirigez vers la page d'expertise
+      })
+      .catch((error) => console.error("Erreur de récupération des données du handyman:", error));
   };
 
   return (
@@ -262,13 +295,28 @@ function DashboardNavbar({ absolute, light, isMini }) {
             <MDInput
               label="Search here"
               sx={{
-                width: "400px", // Default width
-                transition: "width 0.3s ease-in-out", // Smooth transition
+                width: "400px",
+                transition: "width 0.3s ease-in-out",
                 "&:hover": {
-                  width: "500px", // Width when hovered
+                  width: "500px",
                 },
               }}
+              value={searchTerm}
+              onChange={handleSearchChange}
             />
+            {suggestions.length > 0 && (
+              <MDBox sx={{ position: "absolute", zIndex: 1000, bgcolor: "white", boxShadow: 3 }}>
+                {suggestions.map((username) => (
+                  <MDBox
+                    key={username}
+                    sx={{ padding: 1, cursor: "pointer" }}
+                    onClick={() => handleSuggestionClick(username)}
+                  >
+                    {username}
+                  </MDBox>
+                ))}
+              </MDBox>
+            )}
           </MDBox>
         )}
       </Toolbar>
