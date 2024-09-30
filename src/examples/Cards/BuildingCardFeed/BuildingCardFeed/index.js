@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, Button, Grid, TextField } from "@mui/material";
 import PropTypes from "prop-types";
+import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import defaultImage from "assets/images/team-1.jpg"; // Default image
@@ -37,11 +38,45 @@ function BuildingCardFeed({ building }) {
   const handleBookingFormOpen = () => setOpenBookingForm(true);
   const handleBookingFormClose = () => setOpenBookingForm(false);
 
+  // Function to check reservation conflict
+  const checkReservationConflict = async () => {
+    try {
+      const response = await fetch(`/PI/api/buildings/${building.id}/check-reservation-conflict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryDate, exitDate }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      return true; // No conflict, proceed
+    } catch (error) {
+      setErrorMessage(error.message || "An error occurred while checking reservation conflict");
+      setLoading(false);
+      return false;
+    }
+  };
+
+  // Modify handleSubmitBooking to check for conflict before proceeding to payment
   const handleSubmitBooking = async () => {
     setLoading(true);
     setErrorMessage(""); // Reset error message
-    setOpenBookingForm(false);
-    setOpenStripe(true);
+    setPaymentSuccess(false);
+
+    const noConflict = await checkReservationConflict();
+
+    if (noConflict) {
+      // No conflict, proceed to payment
+      setOpenBookingForm(false);
+      setOpenStripe(true);
+      setLoading(false);
+    } else {
+      // Conflict found, stop the flow
+      setLoading(false);
+    }
   };
 
   const handleSubmitPayment = async (event) => {
@@ -55,7 +90,6 @@ function BuildingCardFeed({ building }) {
     }
 
     const cardElement = elements.getElement(CardElement);
-    console.log("Element:", elements.getElement(CardNumberElement));
 
     try {
       // Call your backend to create a PaymentIntent
@@ -65,14 +99,12 @@ function BuildingCardFeed({ building }) {
         body: JSON.stringify({ amount: building.price, currency: "eur" }), // Price is multiplied by 100 to convert to cents
       });
 
-      // Check if the response is OK
       if (!response.ok) {
         throw new Error("Error creating PaymentIntent");
       }
 
       const { clientSecret } = await response.json();
-      console.log("Card Element:", cardElement);
-      // Confirm the payment with the clientSecret
+
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
@@ -83,15 +115,12 @@ function BuildingCardFeed({ building }) {
       });
 
       if (result.error) {
-        // Show error to your customer (e.g., insufficient funds)
         setErrorMessage(result.error.message);
       } else if (result.paymentIntent.status === "succeeded") {
-        // The payment has been processed!
         setPaymentSuccess(true);
         await submitReservation();
       }
     } catch (error) {
-      console.error("Error:", error);
       setErrorMessage(error.message || "An error occurred during payment");
     } finally {
       setLoading(false);
@@ -136,13 +165,7 @@ function BuildingCardFeed({ building }) {
         <MDTypography variant="body2">Area: {building.area} m²</MDTypography>
       </MDBox>
 
-      {/* Enlarged Dialog with Bigger Image */}
-      <Dialog
-        open={open}
-        onClose={handleDialogClose}
-        fullWidth
-        maxWidth="lg" // Set dialog size to large
-      >
+      <Dialog open={open} onClose={handleDialogClose} fullWidth maxWidth="lg">
         <MDBox p={3}>
           <Grid container spacing={3} direction="column">
             <Grid item>
@@ -166,15 +189,29 @@ function BuildingCardFeed({ building }) {
               <MDTypography variant="body1">Rooms: {building.rooms}</MDTypography>
               <MDTypography variant="body1">Price: {building.price} €</MDTypography>
               <MDTypography variant="body1">Area: {building.area} m²</MDTypography>
-              <Button variant="contained" onClick={handleBookingFormOpen} sx={{ mt: 2 }}>
+              <MDButton
+                variant="gradient"
+                color="success" // Sets the color to "success"
+                onClick={handleBookingFormOpen}
+                sx={{ mt: 4, mb: 2 }} // Adds margin-top (mt) and margin-bottom (mb)
+                fullWidth
+              >
                 Book House
-              </Button>
+              </MDButton>
+              <MDButton
+                variant="gradient"
+                color="warning" // Sets the color to "success"
+                onClick={handleDialogClose}
+                sx={{ mt: 0, mb: 2 }} // Adds margin-top (mt) and margin-bottom (mb)
+                fullWidth
+              >
+                Close
+              </MDButton>
             </Grid>
           </Grid>
         </MDBox>
       </Dialog>
 
-      {/* Booking Form Dialog */}
       <Dialog open={openBookingForm} onClose={handleBookingFormClose} fullWidth maxWidth="md">
         <MDBox p={4}>
           <MDTypography variant="h6">Book House</MDTypography>
@@ -200,32 +237,47 @@ function BuildingCardFeed({ building }) {
             }}
             sx={{ mt: 2 }}
           />
-          <Button variant="contained" onClick={handleSubmitBooking} sx={{ mt: 2 }}>
+          <MDButton
+            variant="gradient"
+            color="success"
+            onClick={handleSubmitBooking}
+            sx={{ mt: 4 }}
+            fullWidth
+          >
             Submit
-          </Button>
+          </MDButton>
+          <MDButton
+            variant="gradient"
+            color="error"
+            onClick={handleBookingFormClose}
+            sx={{ mt: 2 }}
+            fullWidth
+          >
+            Cancel
+          </MDButton>
         </MDBox>
       </Dialog>
 
-      {/* Stripe Payment Dialog */}
       {openStripe && (
         <Dialog open={openStripe} onClose={() => setOpenStripe(false)} fullWidth maxWidth="md">
           <MDBox p={4}>
-            <MDTypography variant="h6">Payment</MDTypography>
-            {/* <Elements stripe={stripePromise}> */}
+            <MDTypography variant="h5" sx={{ mb: 3 }}>
+              Payment
+            </MDTypography>
             <form onSubmit={handleSubmitPayment}>
-              <MDBox mb={2}>
+              <MDBox mb={4}>
                 <CardElement options={{ hidePostalCode: true }} />
               </MDBox>
-              <Button
-                variant="contained"
-                color="primary"
+              <MDButton
+                variant="gradient"
+                color="success"
                 type="submit"
                 disabled={!stripe || loading}
+                fullWidth
               >
                 {loading ? "Processing..." : `Pay ${building.price} €`}
-              </Button>
+              </MDButton>
 
-              {/* Display success or error messages */}
               {paymentSuccess && (
                 <MDTypography variant="body2" color="success" mt={2}>
                   Payment succeeded!
@@ -237,7 +289,6 @@ function BuildingCardFeed({ building }) {
                 </MDTypography>
               )}
             </form>
-            {/* </Elements> */}
           </MDBox>
         </Dialog>
       )}
@@ -246,20 +297,7 @@ function BuildingCardFeed({ building }) {
 }
 
 BuildingCardFeed.propTypes = {
-  building: PropTypes.shape({
-    owner: PropTypes.shape({
-      profileImageUrl: PropTypes.string,
-      firstName: PropTypes.string.isRequired,
-      lastName: PropTypes.string.isRequired,
-    }).isRequired,
-    id: PropTypes.string,
-    imageUrl: PropTypes.string,
-    type: PropTypes.string.isRequired,
-    address: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    rooms: PropTypes.number.isRequired,
-    area: PropTypes.number.isRequired,
-  }).isRequired,
+  building: PropTypes.object.isRequired,
 };
 
 export default BuildingCardFeed;

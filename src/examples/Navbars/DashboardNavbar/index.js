@@ -205,6 +205,29 @@ function DashboardNavbar({ absolute, light, isMini }) {
             </>
           ) : (
             <>
+              <Link to="/posts">
+                <MDBox display="flex" alignItems="center">
+                  <IconButton
+                    sx={{
+                      ...iconButtonStyle,
+                      ...(location.pathname === "/posts" && activeStyle),
+                    }}
+                    size="large"
+                    disableRipple
+                  >
+                    <Icon sx={iconsStyle}>article</Icon>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontSize: "1.25rem",
+                        ...(location.pathname === "/posts" && activeStyle),
+                      }}
+                    >
+                      Posts
+                    </Typography>
+                  </IconButton>
+                </MDBox>
+              </Link>
               <Link to="/authentication/sign-in">
                 <MDBox display="flex" alignItems="center">
                   <IconButton
