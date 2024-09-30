@@ -107,7 +107,7 @@ export default function data() {
   const rows = users.map((user) => ({
     author: (
       <Author
-        image={`/PI/image/profile/${user.username}`}
+        image={user.profileImageUrl}
         name={`${user.firstName} ${user.lastName}`}
         email={user.email}
       />

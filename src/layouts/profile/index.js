@@ -14,6 +14,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
+import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
 import PostAddIcon from "@mui/icons-material/PostAdd"; // Import PostAddIcon
 import HomeIcon from "@mui/icons-material/Home";
@@ -44,6 +45,10 @@ function Overview() {
   const [connectedUser, setConnectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [refreshTriger, setRefreshTriger] = useState(false);
+  const triggerRefresh = () => {
+    setRefreshTriger((prev) => !prev); // Toggling the refresh state
+  };
   const [refrech, setRefrech] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -58,6 +63,19 @@ function Overview() {
     role: "",
     currentUsername: "",
   });
+  // const [userUpdated, setUserUpdated] = useState({
+  //   firstName: "",
+  //   lastName: "",
+  //   username: "",
+  //   email: "",
+  //   phoneNumber: "",
+  //   city: "",
+  //   isActive: "",
+  //   isNotLocked: "",
+  //   profileImage: null,
+  //   role: "",
+  //   currentUsername: "",
+  // });
   const [cities, setCities] = useState([]);
   const [newPostData, setNewPostData] = useState({
     title: "",
@@ -90,6 +108,20 @@ function Overview() {
     setOpen(true);
   };
 
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    console.log("Selected file:", file);
+
+    // You can add logic to handle the file upload, such as saving it to formData
+    setFormData((prevState) => ({
+      ...prevState,
+      profileImage: file, // Assuming you're adding the file to formData
+    }));
+  };
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, profileImage: e.target.files[0] });
+    // console.log("saleeeeem ", userUpdated);
+  };
   const handleClose = () => {
     setOpen(false);
   };
@@ -275,22 +307,28 @@ function Overview() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
-
+    const forSubmit = new FormData();
+    const userForSubmission = { ...formData };
+    Object.keys(userForSubmission).forEach((key) => {
+      forSubmit.append(key, userForSubmission[key]);
+    });
     if (token) {
       try {
         const queryString = toQueryString(formData);
 
-        const response = await fetch(`/PI/update?${queryString}`, {
+        const response = await fetch("/PI/update", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          body: forSubmit,
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          //   "Content-Type": "application/json",
+          // },
         });
 
         if (response.ok) {
           const data = await response.json();
           setProfile(data);
+          triggerRefresh();
           setEditMode(false); // Exit edit mode after successful update
         } else {
           console.error("Failed to update profile");
@@ -474,7 +512,7 @@ function Overview() {
         </MDBox>
       ) : (
         <>
-          <Header profile={profile} />
+          <Header profile={profile} refresh={refreshTriger} />
           <MDBox mt={5} mb={3}>
             <Grid container spacing={1}>
               {/* <Grid item xs={12} md={6} xl={4}>
@@ -555,9 +593,28 @@ function Overview() {
                             <TextField {...params} label="City" fullWidth margin="normal" />
                           )}
                         />
-                        <Button type="submit" variant="contained" color="white" fullWidth>
+                        <MDBox mt={2} mb={2}>
+                          <TextField
+                            margin="dense"
+                            name="profileImage"
+                            label="Profile Image"
+                            type="file"
+                            fullWidth
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            onChange={handleImageChange}
+                          />
+                        </MDBox>
+                        <MDButton
+                          type="submit"
+                          variant="gradient"
+                          color="success"
+                          fullWidth
+                          sx={{ mb: 2 }}
+                        >
                           Save
-                        </Button>
+                        </MDButton>
                       </MDBox>
                     </MDBox>
                   </Card>

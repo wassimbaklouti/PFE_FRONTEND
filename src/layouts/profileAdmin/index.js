@@ -14,6 +14,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
+import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
 import PostAddIcon from "@mui/icons-material/PostAdd"; // Import PostAddIcon
 import HomeIcon from "@mui/icons-material/Home";
@@ -81,6 +82,10 @@ function Overview() {
   });
   const [open, setOpen] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
+  const [refreshTriger, setRefreshTriger] = useState(false);
+  const triggerRefresh = () => {
+    setRefreshTriger((prev) => !prev); // Toggling the refresh state
+  };
   const [cardExpire, setCardExpire] = useState("");
   const [refresh, setrefresh] = useState(false);
   const handleClickOpen = () => {
@@ -91,6 +96,10 @@ function Overview() {
     setOpen(true);
   };
 
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, profileImage: e.target.files[0] });
+    // console.log("saleeeeem ", userUpdated);
+  };
   const handleClose = () => {
     setOpen(false);
   };
@@ -276,22 +285,28 @@ function Overview() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
-
+    const forSubmit = new FormData();
+    const userForSubmission = { ...formData };
+    Object.keys(userForSubmission).forEach((key) => {
+      forSubmit.append(key, userForSubmission[key]);
+    });
     if (token) {
       try {
         const queryString = toQueryString(formData);
 
-        const response = await fetch(`/PI/update?${queryString}`, {
+        const response = await fetch("/PI/update", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          body: forSubmit,
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          //   "Content-Type": "application/json",
+          // },
         });
 
         if (response.ok) {
           const data = await response.json();
           setProfile(data);
+          triggerRefresh();
           setEditMode(false); // Exit edit mode after successful update
         } else {
           console.error("Failed to update profile");
@@ -477,7 +492,7 @@ function Overview() {
           </MDBox>
         ) : (
           <>
-            <Header profile={profile} />
+            <Header profile={profile} refresh={refreshTriger} />
             <MDBox mt={5} mb={3}>
               <Grid container spacing={1}>
                 {/* <Grid item xs={12} md={6} xl={4}>
@@ -558,9 +573,28 @@ function Overview() {
                               <TextField {...params} label="City" fullWidth margin="normal" />
                             )}
                           />
-                          <Button type="submit" variant="contained" color="white" fullWidth>
+                          <MDBox mt={2} mb={2}>
+                            <TextField
+                              margin="dense"
+                              name="profileImage"
+                              label="Profile Image"
+                              type="file"
+                              fullWidth
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                              onChange={handleImageChange}
+                            />
+                          </MDBox>
+                          <MDButton
+                            type="submit"
+                            variant="gradient"
+                            color="success"
+                            fullWidth
+                            sx={{ mb: 2 }}
+                          >
                             Save
-                          </Button>
+                          </MDButton>
                         </MDBox>
                       </MDBox>
                     </Card>

@@ -33,6 +33,7 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
   const [authorProfile, setAuthorProfile] = useState(null); // Author info including profile image
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
+  const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
 
   useEffect(() => {
     const fetchConnectedUser = async () => {
@@ -249,7 +250,7 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
         </CardContent>
 
         <MDBox display="flex" justifyContent="space-between" mt={2}>
-          <IconButton onClick={handleLike}>
+          <IconButton onClick={handleLike} disabled={!token}>
             <ThumbUpIcon sx={{ color: hasLiked ? blue[500] : grey[500] }} />
             <MDTypography variant="button" ml={1}>
               Like ({likes})

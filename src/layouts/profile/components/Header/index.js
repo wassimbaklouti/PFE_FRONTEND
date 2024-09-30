@@ -24,50 +24,49 @@ import breakpoints from "assets/theme/base/breakpoints";
 import burceMars from "assets/images/bruce-mars.jpg";
 import backgroundImage from "assets/images/bg-profile.jpeg";
 
-function Header({ children }) {
+function Header({ children, refresh }) {
   const [tabsOrientation, setTabsOrientation] = useState("horizontal");
   const [tabValue, setTabValue] = useState(0);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate(); // Initialize useNavigate
+  const fetchProfile = async () => {
+    const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    console.log("Token:", token); // Debug: Check if token is retrieved
+
+    if (token) {
+      try {
+        const response = await fetch("/PI/connected-user", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log("Profile fetch response:", response); // Debug: Check response
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Profile data:", data); // Debug: Check profile data
+          setProfile(data);
+        } else {
+          console.error("Failed to fetch profile");
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    } else {
+      console.warn("No token found in localStorage");
+    }
+
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
-      console.log("Token:", token); // Debug: Check if token is retrieved
-
-      if (token) {
-        try {
-          const response = await fetch("/PI/connected-user", {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-
-          console.log("Profile fetch response:", response); // Debug: Check response
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log("Profile data:", data); // Debug: Check profile data
-            setProfile(data);
-          } else {
-            console.error("Failed to fetch profile");
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-        }
-      } else {
-        console.warn("No token found in localStorage");
-      }
-
-      setLoading(false);
-    };
-
     fetchProfile();
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     // A function that sets the orientation state of the tabs.
@@ -132,7 +131,7 @@ function Header({ children }) {
         <Grid container spacing={3} alignItems="center">
           <Grid item>
             <MDAvatar
-              src={`/PI/image/profile/${profile.username}`}
+              src={`${profile.profileImageUrl}?${new Date().getTime()}`}
               alt="profile-image"
               size="xxl"
               shadow="sm"
@@ -206,6 +205,7 @@ Header.defaultProps = {
 // Typechecking props for the Header
 Header.propTypes = {
   children: PropTypes.node,
+  refresh: PropTypes.bool,
 };
 
 export default Header;

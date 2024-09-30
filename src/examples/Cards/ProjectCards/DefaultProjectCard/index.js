@@ -185,6 +185,7 @@ function DefaultProjectCard({
             title={title}
             sx={{
               maxWidth: "100%",
+              aspectRatio: "1",
               margin: 0,
               boxShadow: ({ boxShadows: { md } }) => md,
               objectFit: "cover",
