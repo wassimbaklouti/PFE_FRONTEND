@@ -129,7 +129,8 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="dark"
                   icon="plumbing"
-                  title="Plomberie"
+                  title="Plumbing"
+                  expertiese="plumber"
                   count={handymanCounts.plumbing}
                   percentage={{
                     color: "success",
@@ -144,7 +145,8 @@ function Dashboard() {
               <MDBox mb={1.5}>
                 <ComplexStatisticsCard
                   icon="electric_bolt"
-                  title="électricité"
+                  title="Electricity"
+                  expertiese="electrician"
                   count={handymanCounts.electricity}
                   percentage={{
                     color: "success",
@@ -160,8 +162,9 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="success"
                   icon="cleaning_services"
-                  title="aide ménagère"
+                  title="Housekeeping"
                   count={handymanCounts.housekeeping}
+                  expertiese="housekeeper"
                   percentage={{
                     color: "success",
                     amount: "+1%",
@@ -177,8 +180,9 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="primary"
                   icon="ac_unit"
-                  title="climatisation"
+                  title="Air Conditioning"
                   count={handymanCounts.airConditioning}
+                  expertiese="AC technician"
                   percentage={{
                     color: "success",
                     amount: "10%",
@@ -193,7 +197,8 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="primary"
                   icon="local_laundry_service"
-                  title="machine à laver"
+                  title="Home Appliance"
+                  expertiese="home appliance technician"
                   count={handymanCounts.washingMachine}
                   percentage={{
                     color: "success",
@@ -209,7 +214,8 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="primary"
                   icon="format_paint"
-                  title="peinture"
+                  title="Painting"
+                  expertiese="painter"
                   count={handymanCounts.painting}
                   percentage={{
                     color: "success",
@@ -225,7 +231,8 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="primary"
                   icon="child_friendly"
-                  title="baby sitting"
+                  title="Baby Sitting"
+                  expertiese="baby sitter"
                   count={handymanCounts.babysitting}
                   percentage={{
                     color: "success",
@@ -241,7 +248,8 @@ function Dashboard() {
                 <ComplexStatisticsCard
                   // color="primary"
                   icon="yard"
-                  title="jardinage"
+                  title="Gardening"
+                  expertiese="gardener"
                   count={handymanCounts.gardening}
                   percentage={{
                     color: "success",
@@ -256,7 +264,8 @@ function Dashboard() {
               <MDBox mb={1.5}>
                 <ComplexStatisticsCard
                   icon="handyman" // Icon for carpenter
-                  title="Menuiserie"
+                  title="Carpentry"
+                  expertiese="carpenter"
                   count={handymanCounts.carpentry}
                   percentage={{
                     color: "success",
@@ -271,7 +280,8 @@ function Dashboard() {
               <MDBox mb={1.5}>
                 <ComplexStatisticsCard
                   icon="construction" // Icon for mason
-                  title="Maçonnerie"
+                  title="Construction"
+                  expertiese="mason"
                   count={handymanCounts.masonry}
                   percentage={{
                     color: "success",
@@ -286,7 +296,8 @@ function Dashboard() {
               <MDBox mb={1.5}>
                 <ComplexStatisticsCard
                   icon="build" // Icon for welding (or use "construction" or similar)
-                  title="Soudure"
+                  title="Welding"
+                  expertiese="welder"
                   count={handymanCounts.welding}
                   percentage={{
                     color: "success",
@@ -301,7 +312,8 @@ function Dashboard() {
               <MDBox mb={1.5}>
                 <ComplexStatisticsCard
                   icon="home" // Icon for houses
-                  title="Maisons"
+                  title="Houses"
+                  expertiese="house"
                   count={handymanCounts.houses}
                   percentage={{
                     color: "success",

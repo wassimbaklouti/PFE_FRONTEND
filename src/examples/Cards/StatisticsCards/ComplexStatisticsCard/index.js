@@ -6,7 +6,7 @@ import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
-function ComplexStatisticsCard({ color, title, count, percentage, icon, path }) {
+function ComplexStatisticsCard({ color, title, count, expertiese, icon, path }) {
   const navigate = useNavigate(); // Initialize useNavigate
 
   const handleClick = () => {
@@ -27,33 +27,24 @@ function ComplexStatisticsCard({ color, title, count, percentage, icon, path }) 
           display="flex"
           justifyContent="center"
           alignItems="center"
-          width="4rem"
-          height="4rem"
+          width="6rem"
+          height="6rem"
           mt={-3}
         >
-          <Icon fontSize="medium" color="inherit">
+          <Icon fontSize="large" color="inherit">
             {icon}
           </Icon>
         </MDBox>
         <MDBox textAlign="right" lineHeight={1.25}>
-          <MDTypography variant="button" fontWeight="light" color="text">
+          <MDTypography variant="h4" fontWeight="medium" color="text" sx={{ mt: 4, mb: 2, mr: 2 }}>
             {title}
           </MDTypography>
-          <MDTypography variant="h4">{count}</MDTypography>
         </MDBox>
       </MDBox>
-      <Divider />
+      <Divider sx={{ mt: 7 }} />
       <MDBox pb={2} px={2}>
-        <MDTypography component="p" variant="button" color="text" display="flex">
-          <MDTypography
-            component="span"
-            variant="button"
-            fontWeight="bold"
-            color={percentage.color}
-          >
-            {percentage.amount}
-          </MDTypography>
-          &nbsp;{percentage.label}
+        <MDTypography variant="h6" fontWeight="bold" color="text" sx={{ ml: 1, mb: 2 }}>
+          {count} {count < 2 ? expertiese : `${expertiese}s`} available
         </MDTypography>
       </MDBox>
     </Card>
@@ -63,11 +54,6 @@ function ComplexStatisticsCard({ color, title, count, percentage, icon, path }) 
 // Setting default values for the props of ComplexStatisticsCard
 ComplexStatisticsCard.defaultProps = {
   color: "info",
-  percentage: {
-    color: "success",
-    text: "",
-    label: "",
-  },
   path: "", // Add default path prop
 };
 
@@ -84,21 +70,8 @@ ComplexStatisticsCard.propTypes = {
     "dark",
   ]),
   title: PropTypes.string.isRequired,
+  expertiese: PropTypes.string.isRequired,
   count: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  percentage: PropTypes.shape({
-    color: PropTypes.oneOf([
-      "primary",
-      "secondary",
-      "info",
-      "success",
-      "warning",
-      "error",
-      "dark",
-      "white",
-    ]),
-    amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    label: PropTypes.string,
-  }),
   icon: PropTypes.node.isRequired,
   path: PropTypes.string, // Add typechecking for the path prop
 };
