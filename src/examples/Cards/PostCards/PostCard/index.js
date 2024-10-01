@@ -25,6 +25,23 @@ function PostCard({ postId, image, title, content, username, onDeletePost, onUpd
   const [updatedContent, setUpdatedContent] = useState(content);
   const [originalContent, setOriginalContent] = useState(content);
   const [imageFile, setImageFile] = useState(null); // For storing the image file
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    type: "",
+    city: "",
+    address: "",
+    rooms: "",
+    price: "",
+    area: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    cardnumber: "",
+    cardExpire: "",
+  });
 
   // Function to handle opening the update dialog
   const handleClickOpen = () => {

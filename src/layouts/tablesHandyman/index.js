@@ -71,6 +71,24 @@ function TablesHandyman() {
 
   const openSuccessSB = () => setSuccessSB(true);
   const closeSuccessSB = () => setSuccessSB(false);
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    type: "",
+    city: "",
+    address: "",
+    rooms: "",
+    price: "",
+    area: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    cardnumber: "",
+    cardExpire: "",
+    expertise: "",
+  });
 
   useEffect(() => {
     const getCities = async () => {
@@ -91,6 +109,10 @@ function TablesHandyman() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewUser({ ...newUser, [name]: value });
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -99,9 +121,60 @@ function TablesHandyman() {
 
   const handleCityChange = (event, value) => {
     setNewUser({ ...newUser, city: value });
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleSubmit = async () => {
+    let formIsValid = true;
+    let newErrors = {};
+    const regexPhone = /^[0-9]{8,13}$/;
+    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!newUser.firstName.trim()) {
+      formIsValid = false;
+      newErrors.firstName = "First name is required";
+    }
+
+    // Check if content is empty
+    if (!newUser.lastName.trim()) {
+      formIsValid = false;
+      newErrors.lastName = "Last name is required";
+    }
+    if (!newUser.username.trim()) {
+      formIsValid = false;
+      newErrors.username = "User name is required";
+    }
+    if (!regexEmail.test(newUser.email)) {
+      formIsValid = false;
+      newErrors.email = "Invalid email address";
+    }
+    if (!newUser.email.trim()) {
+      formIsValid = false;
+      newErrors.email = "Email is required";
+    }
+    if (!regexPhone.test(newUser.phoneNumber)) {
+      formIsValid = false;
+      newErrors.phoneNumber = "Phone number must be between 8 and 13 digits";
+    }
+    if (!newUser.phoneNumber) {
+      formIsValid = false;
+      newErrors.phoneNumber = "Phone number is required";
+    }
+    if (!newUser.city.trim()) {
+      formIsValid = false;
+      newErrors.city = "City name is required";
+    }
+    if (!newUser.expertise.trim()) {
+      formIsValid = false;
+      newErrors.expertise = "Expertise is required";
+    }
+
+    if (!formIsValid) {
+      setErrors(newErrors); // Set errors if form is invalid
+      return;
+    }
     setLoading(true); // Set loading to true when form submission starts
     const formData = new FormData();
 
@@ -241,6 +314,8 @@ function TablesHandyman() {
                 fullWidth
                 value={newUser.firstName}
                 onChange={handleChange}
+                error={!!errors.firstName}
+                helperText={errors.firstName}
               />
               <TextField
                 margin="dense"
@@ -250,6 +325,8 @@ function TablesHandyman() {
                 fullWidth
                 value={newUser.lastName}
                 onChange={handleChange}
+                error={!!errors.lastName}
+                helperText={errors.lastName}
               />
               <TextField
                 margin="dense"
@@ -259,6 +336,8 @@ function TablesHandyman() {
                 fullWidth
                 value={newUser.username}
                 onChange={handleChange}
+                error={!!errors.username}
+                helperText={errors.username}
               />
               <TextField
                 margin="dense"
@@ -268,6 +347,8 @@ function TablesHandyman() {
                 fullWidth
                 value={newUser.email}
                 onChange={handleChange}
+                error={!!errors.email}
+                helperText={errors.email}
               />
               {/* <Autocomplete
                 options={roleOptions}
@@ -281,7 +362,24 @@ function TablesHandyman() {
                 )}
               /> */}
               {newUser.role === "ROLE_HANDYMAN" && (
-                <FormControl fullWidth margin="dense">
+                <FormControl
+                  fullWidth
+                  margin="dense"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      height: "44px", // Adjust the height here
+                      borderRadius: "5px", // Optional: Customize border radius
+                    },
+                    "& .MuiInputLabel-root": {
+                      // top: "-5px", // Adjust label positioning if necessary
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#d2d6da", // Optional: Customize border color
+                    },
+                  }}
+                  error={!!errors.expertise}
+                  helperText={errors.expertise}
+                >
                   <InputLabel id="expertise-label">Expertise</InputLabel>
                   <Select
                     labelId="expertise-label"
@@ -305,7 +403,14 @@ function TablesHandyman() {
                 value={newUser.city || null}
                 onChange={handleCityChange}
                 renderInput={(params) => (
-                  <TextField {...params} label="City" margin="dense" fullWidth />
+                  <TextField
+                    {...params}
+                    label="City"
+                    margin="dense"
+                    fullWidth
+                    error={!!errors.city}
+                    helperText={errors.city}
+                  />
                 )}
               />
               <TextField
@@ -316,6 +421,8 @@ function TablesHandyman() {
                 fullWidth
                 value={newUser.phoneNumber}
                 onChange={handleChange}
+                error={!!errors.phoneNumber}
+                helperText={errors.phoneNumber}
               />
               <TextField
                 margin="dense"

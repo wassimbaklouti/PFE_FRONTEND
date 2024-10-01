@@ -75,6 +75,7 @@ function BuildingCardFeed({ building }) {
       setLoading(false);
     } else {
       // Conflict found, stop the flow
+      setErrorMessage("The dates you selected conflicts with an other reservation");
       setLoading(false);
     }
   };
@@ -238,6 +239,11 @@ function BuildingCardFeed({ building }) {
             }}
             sx={{ mt: 2 }}
           />
+          {errorMessage && (
+            <MDTypography variant="body2" color="error" mt={2}>
+              {errorMessage}
+            </MDTypography>
+          )}
           <MDButton
             variant="gradient"
             color="success"

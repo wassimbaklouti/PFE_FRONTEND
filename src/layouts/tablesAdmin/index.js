@@ -71,6 +71,23 @@ function TablesAdmin() {
 
   const openSuccessSB = () => setSuccessSB(true);
   const closeSuccessSB = () => setSuccessSB(false);
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    type: "",
+    city: "",
+    address: "",
+    rooms: "",
+    price: "",
+    area: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    cardnumber: "",
+    cardExpire: "",
+  });
 
   useEffect(() => {
     const getCities = async () => {
@@ -91,6 +108,10 @@ function TablesAdmin() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewUser({ ...newUser, [name]: value });
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -99,9 +120,56 @@ function TablesAdmin() {
 
   const handleCityChange = (event, value) => {
     setNewUser({ ...newUser, city: value });
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleSubmit = async () => {
+    let formIsValid = true;
+    let newErrors = {};
+    const regexPhone = /^[0-9]{8,13}$/;
+    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!newUser.firstName.trim()) {
+      formIsValid = false;
+      newErrors.firstName = "First name is required";
+    }
+
+    // Check if content is empty
+    if (!newUser.lastName.trim()) {
+      formIsValid = false;
+      newErrors.lastName = "Last name is required";
+    }
+    if (!newUser.username.trim()) {
+      formIsValid = false;
+      newErrors.username = "User name is required";
+    }
+    if (!regexEmail.test(newUser.email)) {
+      formIsValid = false;
+      newErrors.email = "Invalid email address";
+    }
+    if (!newUser.email.trim()) {
+      formIsValid = false;
+      newErrors.email = "Email is required";
+    }
+    if (!regexPhone.test(newUser.phoneNumber)) {
+      formIsValid = false;
+      newErrors.phoneNumber = "Phone number must be between 8 and 13 digits";
+    }
+    if (!newUser.phoneNumber) {
+      formIsValid = false;
+      newErrors.phoneNumber = "Phone number is required";
+    }
+    if (!newUser.city.trim()) {
+      formIsValid = false;
+      newErrors.city = "City name is required";
+    }
+
+    if (!formIsValid) {
+      setErrors(newErrors); // Set errors if form is invalid
+      return;
+    }
     setLoading(true); // Set loading to true when form submission starts
     const formData = new FormData();
 
@@ -241,6 +309,8 @@ function TablesAdmin() {
                 fullWidth
                 value={newUser.firstName}
                 onChange={handleChange}
+                error={!!errors.firstName}
+                helperText={errors.firstName}
               />
               <TextField
                 margin="dense"
@@ -250,6 +320,8 @@ function TablesAdmin() {
                 fullWidth
                 value={newUser.lastName}
                 onChange={handleChange}
+                error={!!errors.lastName}
+                helperText={errors.lastName}
               />
               <TextField
                 margin="dense"
@@ -259,6 +331,8 @@ function TablesAdmin() {
                 fullWidth
                 value={newUser.username}
                 onChange={handleChange}
+                error={!!errors.username}
+                helperText={errors.username}
               />
               <TextField
                 margin="dense"
@@ -268,6 +342,8 @@ function TablesAdmin() {
                 fullWidth
                 value={newUser.email}
                 onChange={handleChange}
+                error={!!errors.email}
+                helperText={errors.email}
               />
               {/* <Autocomplete
                 options={roleOptions}
@@ -305,7 +381,14 @@ function TablesAdmin() {
                 value={newUser.city || null}
                 onChange={handleCityChange}
                 renderInput={(params) => (
-                  <TextField {...params} label="City" margin="dense" fullWidth />
+                  <TextField
+                    {...params}
+                    label="City"
+                    margin="dense"
+                    fullWidth
+                    error={!!errors.city}
+                    helperText={errors.city}
+                  />
                 )}
               />
               <TextField
@@ -316,6 +399,8 @@ function TablesAdmin() {
                 fullWidth
                 value={newUser.phoneNumber}
                 onChange={handleChange}
+                error={!!errors.phoneNumber}
+                helperText={errors.phoneNumber}
               />
               <TextField
                 margin="dense"

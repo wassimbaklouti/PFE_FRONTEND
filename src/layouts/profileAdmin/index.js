@@ -46,6 +46,23 @@ function Overview() {
   const [profile, setProfile] = useState(null);
   const [connectedUser, setConnectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    type: "",
+    city: "",
+    address: "",
+    rooms: "",
+    price: "",
+    area: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    cardnumber: "",
+    cardExpire: "",
+  });
   const [editMode, setEditMode] = useState(false);
   const [refreshTriger, setRefreshTriger] = useState(false);
   const triggerRefresh = () => {
@@ -135,6 +152,31 @@ function Overview() {
   };
 
   const handleSave = () => {
+    let formIsValid = true;
+    let newErrors = {};
+    const cardNumberRegex = /^\d{16}$/;
+    const cardExpireRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    if (!cardNumberRegex.test(cardNumber)) {
+      formIsValid = false;
+      newErrors.cardnumber = "Card number must be exactly 16 digits";
+    }
+    if (!cardNumber) {
+      formIsValid = false;
+      newErrors.cardnumber = "Card number is required";
+    }
+    if (!cardExpire) {
+      formIsValid = false;
+      newErrors.cardExpire = "Card expiration date is required";
+    }
+    if (!cardExpireRegex.test(cardExpire)) {
+      formIsValid = false;
+      newErrors.cardExpire = "Card expiration date must be in 'MM/YY' format";
+    }
+
+    if (!formIsValid) {
+      setErrors(newErrors); // Set errors if form is invalid
+      return;
+    }
     // Using fetch to call the backend
     fetch(
       `/PI/update-card?username=${connectedUser.username}&cardnumber=${cardNumber}&cardexpire=${cardExpire}`,
@@ -297,12 +339,20 @@ function Overview() {
       ...prevData,
       [name]: value,
     }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleCityChange = (event, newValue) => {
     setFormData((prevData) => ({
       ...prevData,
       city: newValue || "",
+    }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
     }));
   };
   const handleBuildingCityChange = (event, newValue) => {
@@ -321,6 +371,49 @@ function Overview() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    let formIsValid = true;
+    let newErrors = {};
+    const regexPhone = /^[0-9]{8,13}$/;
+    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!formData.firstName.trim()) {
+      formIsValid = false;
+      newErrors.firstName = "First name is required";
+    }
+
+    // Check if content is empty
+    if (!formData.lastName.trim()) {
+      formIsValid = false;
+      newErrors.content = "Last name is required";
+    }
+    if (!formData.username.trim()) {
+      formIsValid = false;
+      newErrors.username = "User name is required";
+    }
+    if (!formData.email.trim()) {
+      formIsValid = false;
+      newErrors.email = "Email is required";
+    }
+    if (!regexEmail.test(formData.email)) {
+      formIsValid = false;
+      newErrors.email = "Invalid email address";
+    }
+    if (!formData.phoneNumber) {
+      formIsValid = false;
+      newErrors.phoneNumber = "Phone number is required";
+    }
+    if (!regexPhone.test(formData.phoneNumber)) {
+      formIsValid = false;
+      newErrors.phoneNumber = "Phone number must be between 8 and 13 digits";
+    }
+    if (!formData.city.trim()) {
+      formIsValid = false;
+      newErrors.city = "City name is required";
+    }
+
+    if (!formIsValid) {
+      setErrors(newErrors); // Set errors if form is invalid
+      return;
+    }
     const forSubmit = new FormData();
     const userForSubmission = { ...formData };
     Object.keys(userForSubmission).forEach((key) => {
@@ -361,6 +454,28 @@ function Overview() {
       ...prevData,
       [name]: value,
     }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
+  };
+
+  const handleCardNumberChange = (e) => {
+    const value = e.target.value;
+    setCardNumber(value);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
+  };
+
+  const handleCardExpireChange = (e) => {
+    const value = e.target.value;
+    setCardExpire(value);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleImageFileChange = (e) => {
@@ -381,7 +496,23 @@ function Overview() {
   const handleNewPostSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    let formIsValid = true;
+    let newErrors = {};
+    if (!newPostData.title.trim()) {
+      formIsValid = false;
+      newErrors.title = "Title is required";
+    }
 
+    // Check if content is empty
+    if (!newPostData.content.trim()) {
+      formIsValid = false;
+      newErrors.content = "Content is required";
+    }
+
+    if (!formIsValid) {
+      setErrors(newErrors); // Set errors if form is invalid
+      return;
+    }
     if (token && profile) {
       const formData = new FormData();
       formData.append("username", profile.username); // Pass the connected username
@@ -451,11 +582,45 @@ function Overview() {
       ...prevData,
       [name]: value,
     }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "", // Clear error when user starts typing
+    }));
   };
 
   const handleNewBuildingSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+    let formIsValid = true;
+    let newErrors = {};
+    if (!newBuildingData.type.trim()) {
+      formIsValid = false;
+      newErrors.type = "Type is required";
+    }
+    if (!newBuildingData.address.trim()) {
+      formIsValid = false;
+      newErrors.address = "Address is required";
+    }
+    if (!newBuildingData.rooms.trim()) {
+      formIsValid = false;
+      newErrors.rooms = "Rooms is required";
+    }
+    if (!newBuildingData.price.trim()) {
+      formIsValid = false;
+      newErrors.price = "Price is required";
+    }
+    if (!newBuildingData.area.trim()) {
+      formIsValid = false;
+      newErrors.area = "Area is required";
+    }
+    if (!newBuildingData.city.trim()) {
+      formIsValid = false;
+      newErrors.city = "City is required";
+    }
+    if (!formIsValid) {
+      setErrors(newErrors); // Set errors if form is invalid
+      return;
+    }
     if (token && profile) {
       // Construire un objet JavaScript avec les données du bâtiment, y compris les champs supplémentaires
       const buildingData = {
@@ -542,7 +707,7 @@ function Overview() {
             width="100vw" // Makes it take full width of the viewport
             position="absolute" // Ensures it takes up the whole page
             top={0}
-            left={-2}
+            // left={-150}
             bgcolor="background.default" // Optional: set the background color
           >
             <CircularProgress />
@@ -588,6 +753,8 @@ function Overview() {
                             onChange={handleChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.firstName}
+                            helperText={errors.firstName}
                           />
                           <TextField
                             label="Lastname"
@@ -596,6 +763,8 @@ function Overview() {
                             onChange={handleChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.lastName}
+                            helperText={errors.lastName}
                           />
                           <TextField
                             label="Username"
@@ -604,6 +773,8 @@ function Overview() {
                             onChange={handleChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.username}
+                            helperText={errors.username}
                           />
                           <TextField
                             label="Email"
@@ -612,6 +783,8 @@ function Overview() {
                             onChange={handleChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.email}
+                            helperText={errors.email}
                           />
                           <TextField
                             label="Phone Number"
@@ -620,6 +793,8 @@ function Overview() {
                             onChange={handleChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.phoneNumber}
+                            helperText={errors.phoneNumber}
                           />
                           <Autocomplete
                             options={cities}
@@ -627,7 +802,14 @@ function Overview() {
                             value={formData.city}
                             onChange={handleCityChange}
                             renderInput={(params) => (
-                              <TextField {...params} label="City" fullWidth margin="normal" />
+                              <TextField
+                                {...params}
+                                label="City"
+                                fullWidth
+                                margin="normal"
+                                error={!!errors.city}
+                                helperText={errors.city}
+                              />
                             )}
                           />
                           <MDBox mt={2} mb={2}>
@@ -651,6 +833,16 @@ function Overview() {
                             sx={{ mb: 2 }}
                           >
                             Save
+                          </MDButton>
+                          <MDButton
+                            type="button"
+                            onClick={() => setEditMode(false)}
+                            variant="gradient"
+                            color="warning"
+                            fullWidth
+                            sx={{ mb: 2 }}
+                          >
+                            Cancel
                           </MDButton>
                         </MDBox>
                       </MDBox>
@@ -697,6 +889,8 @@ function Overview() {
                             onChange={handleNewPostChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.title}
+                            helperText={errors.title}
                           />
                           <TextField
                             label="Content"
@@ -705,16 +899,18 @@ function Overview() {
                             onChange={handleNewPostChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.content}
+                            helperText={errors.content}
                           />
                           <input
                             accept="image/*"
                             type="file"
                             onChange={handleImageFileChange}
-                            style={{ margin: "16px 0" }} // Add some margin for better layout
+                            style={{ margin: "16px 0" }}
                           />
-                          <Button type="submit" variant="contained" color="white" fullWidth>
+                          <MDButton type="submit" variant="gradient" color="success" fullWidth>
                             Add Post
-                          </Button>
+                          </MDButton>
                         </MDBox>
                       </MDBox>
                     </Card>
@@ -761,6 +957,8 @@ function Overview() {
                             onChange={handleNewPostChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.title}
+                            helperText={errors.title}
                           />
                           <TextField
                             label="Content"
@@ -769,6 +967,8 @@ function Overview() {
                             onChange={handleNewPostChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.content}
+                            helperText={errors.content}
                           />
                           <input
                             accept="image/*"
@@ -792,6 +992,8 @@ function Overview() {
                             onChange={handleNewBuildingChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.type}
+                            helperText={errors.type}
                           />
                           <Autocomplete
                             options={cities}
@@ -799,7 +1001,14 @@ function Overview() {
                             value={newBuildingData.city}
                             onChange={handleBuildingCityChange}
                             renderInput={(params) => (
-                              <TextField {...params} label="City" fullWidth margin="normal" />
+                              <TextField
+                                {...params}
+                                label="City"
+                                fullWidth
+                                margin="normal"
+                                error={!!errors.city}
+                                helperText={errors.city}
+                              />
                             )}
                           />
                           <TextField
@@ -809,6 +1018,8 @@ function Overview() {
                             onChange={handleNewBuildingChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.address}
+                            helperText={errors.address}
                           />
                           <TextField
                             label="Rooms"
@@ -817,6 +1028,9 @@ function Overview() {
                             onChange={handleNewBuildingChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.rooms}
+                            helperText={errors.rooms}
+                            type="number"
                           />
                           <TextField
                             label="Price"
@@ -825,6 +1039,10 @@ function Overview() {
                             onChange={handleNewBuildingChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.price}
+                            helperText={errors.price}
+                            type="number"
+                            inputProps={{ step: "0.1" }}
                           />
                           <TextField
                             label="Area"
@@ -833,6 +1051,10 @@ function Overview() {
                             onChange={handleNewBuildingChange}
                             fullWidth
                             margin="normal"
+                            error={!!errors.area}
+                            helperText={errors.area}
+                            type="number"
+                            inputProps={{ step: "0.1" }}
                           />
                           <input
                             accept="image/*"
@@ -868,9 +1090,9 @@ function Overview() {
                             connectedUser.cardnumber ? connectedUser.cardnumber : "****************"
                           }`}
                           holder={`${connectedUser.firstName} ${connectedUser.lastName}`}
-                          expires={`${
-                            connectedUser.cardexpire ? connectedUser.cardexpire : "**/**"
-                          }`}
+                          expires={`
+                            ${connectedUser.cardexpire ? connectedUser.cardexpire : "**/**"}
+                          `}
                           sx={{ marginTop: "24px" }}
                         />
                       </MDBox>
@@ -884,16 +1106,20 @@ function Overview() {
                         label="Card Number"
                         fullWidth
                         value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value)}
+                        onChange={handleCardNumberChange}
                         variant="outlined"
+                        error={!!errors.cardnumber}
+                        helperText={errors.cardnumber}
                       />
                       <TextField
                         margin="dense"
                         label="Expiration Date"
                         fullWidth
                         value={cardExpire}
-                        onChange={(e) => setCardExpire(e.target.value)}
+                        onChange={handleCardExpireChange}
                         variant="outlined"
+                        error={!!errors.cardExpire}
+                        helperText={errors.cardExpire}
                       />
                     </DialogContent>
                     <DialogActions>
