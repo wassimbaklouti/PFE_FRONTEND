@@ -88,6 +88,8 @@ function Overview() {
     rooms: "",
     price: "",
     area: "",
+    city: "",
+    city: "",
     owner: {
       userId: "",
       firstName: "",
@@ -120,6 +122,10 @@ function Overview() {
   };
   const handleImageChange = (e) => {
     setFormData({ ...formData, profileImage: e.target.files[0] });
+    // console.log("saleeeeem ", userUpdated);
+  };
+  const handlePostImageChange = (e) => {
+    setNewPostData({ ...newPostData, profileImage: e.target.files[0] });
     // console.log("saleeeeem ", userUpdated);
   };
   const handleClose = () => {
@@ -297,6 +303,12 @@ function Overview() {
       city: newValue || "",
     }));
   };
+  const handleBuildingCityChange = (event, newValue) => {
+    setNewBuildingData((prevData) => ({
+      ...prevData,
+      city: newValue || "",
+    }));
+  };
 
   const toQueryString = (data) => {
     return Object.keys(data)
@@ -352,6 +364,13 @@ function Overview() {
   const handleImageFileChange = (e) => {
     const file = e.target.files[0];
     setNewPostData((prevData) => ({
+      ...prevData,
+      imageFile: file, // Store the selected file
+    }));
+  };
+  const handleBuildingImageFileChange = (e) => {
+    const file = e.target.files[0];
+    setNewBuildingData((prevData) => ({
       ...prevData,
       imageFile: file, // Store the selected file
     }));
@@ -673,11 +692,11 @@ function Overview() {
                           accept="image/*"
                           type="file"
                           onChange={handleImageFileChange}
-                          style={{ margin: "16px 0" }} // Add some margin for better layout
+                          style={{ margin: "16px 0" }}
                         />
-                        <Button type="submit" variant="contained" color="white" fullWidth>
+                        <MDButton type="submit" variant="gradient" color="success" fullWidth>
                           Add Post
-                        </Button>
+                        </MDButton>
                       </MDBox>
                     </MDBox>
                   </Card>
@@ -739,9 +758,9 @@ function Overview() {
                           onChange={handleImageFileChange}
                           style={{ margin: "16px 0" }}
                         />
-                        <Button type="submit" variant="contained" color="white" fullWidth>
+                        <MDButton type="submit" variant="gradient" color="success" fullWidth>
                           Add Post
-                        </Button>
+                        </MDButton>
                       </MDBox>
                     )}
 
@@ -755,6 +774,15 @@ function Overview() {
                           onChange={handleNewBuildingChange}
                           fullWidth
                           margin="normal"
+                        />
+                        <Autocomplete
+                          options={cities}
+                          getOptionLabel={(option) => option}
+                          value={newBuildingData.city}
+                          onChange={handleBuildingCityChange}
+                          renderInput={(params) => (
+                            <TextField {...params} label="City" fullWidth margin="normal" />
+                          )}
                         />
                         <TextField
                           label="Address"
@@ -788,9 +816,15 @@ function Overview() {
                           fullWidth
                           margin="normal"
                         />
-                        <Button type="submit" variant="contained" color="white" fullWidth>
+                        <input
+                          accept="image/*"
+                          type="file"
+                          onChange={handleBuildingImageFileChange}
+                          style={{ margin: "16px 0" }}
+                        />
+                        <MDButton type="submit" variant="gradient" color="success" fullWidth>
                           Add Building
-                        </Button>
+                        </MDButton>
                       </MDBox>
                     )}
                   </Card>
@@ -864,11 +898,12 @@ function Overview() {
                   <Grid item xs={12} md={6} xl={3} key={post.id}>
                     <PostCard
                       postId={post.id}
-                      image={homeDecor1}
+                      image={post.image_url || homeDecor1}
                       title={post.title}
                       content={post.content}
                       username={post.username}
                       onDeletePost={handleRefrech}
+                      onUpdatePost={handleRefrech}
                       action={{
                         type: "internal",
                         route: `/posts/${post.id}`,

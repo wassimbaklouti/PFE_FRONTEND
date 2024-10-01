@@ -18,7 +18,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 
-function PostCard({ postId, image, title, content, username, onDeletePost }) {
+function PostCard({ postId, image, title, content, username, onDeletePost, onUpdatePost }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState(title);
   const [originalTitle, setOriginalTitle] = useState(title);
@@ -56,6 +56,7 @@ function PostCard({ postId, image, title, content, username, onDeletePost }) {
       });
 
       console.log("Post updated successfully:", response.data);
+      onUpdatePost();
       handleClose();
       setOriginalContent(updatedContent);
       setOriginalTitle(updatedTitle);
@@ -89,11 +90,12 @@ function PostCard({ postId, image, title, content, username, onDeletePost }) {
     >
       <MDBox position="relative" width="100.25%" shadow="xl" borderRadius="xl">
         <CardMedia
-          src={image}
+          src={`${image}?${new Date().getTime()}`}
           component="img"
           title={title}
           sx={{
             maxWidth: "100%",
+            aspectRatio: "1.6",
             margin: 0,
             objectFit: "cover",
             objectPosition: "center",
@@ -176,6 +178,7 @@ PostCard.propTypes = {
   content: PropTypes.string.isRequired,
   username: PropTypes.string.isRequired,
   onDeletePost: PropTypes.func,
+  onUpdatePost: PropTypes.func,
 };
 
 export default PostCard;
