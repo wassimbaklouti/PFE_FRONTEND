@@ -61,6 +61,7 @@ import Masons from "layouts/masons";
 import Welders from "layouts/welders";
 import Electricians from "layouts/electricians";
 import Houses from "layouts/houses";
+import HousesAdmin from "layouts/housesAdmin";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 
@@ -119,6 +120,15 @@ const routes = [
     icon: <Icon fontSize="small">house</Icon>,
     route: "/TablesPropertyowner",
     component: <TablesPropertyowner />,
+    roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "collapse",
+    name: "Houses",
+    key: "HousesAdmin",
+    icon: <Icon fontSize="small">apartment</Icon>,
+    route: "/HousesAdmin",
+    component: <HousesAdmin />,
     roles: ["ROLE_ADMIN"],
   },
   {

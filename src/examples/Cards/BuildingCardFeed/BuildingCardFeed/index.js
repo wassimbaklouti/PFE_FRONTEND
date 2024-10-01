@@ -154,12 +154,13 @@ function BuildingCardFeed({ building }) {
     <div>
       <MDBox onClick={handleDialogOpen} sx={{ cursor: "pointer" }}>
         <img
-          src={building.owner.profileImageUrl || defaultImage}
+          src={building.image_url || defaultImage}
           alt="Building"
-          style={{ width: "100%", borderRadius: "8px" }}
+          style={{ width: "100%", borderRadius: "8px", aspectRatio: "1" }}
         />
         <MDTypography variant="h6">{building.type}</MDTypography>
-        <MDTypography variant="body2">{building.address}</MDTypography>
+        <MDTypography variant="body2">City: {building.city}</MDTypography>
+        <MDTypography variant="body2">Address: {building.address}</MDTypography>
         <MDTypography variant="body2">Price: {building.price} €</MDTypography>
         <MDTypography variant="body2">Rooms: {building.rooms}</MDTypography>
         <MDTypography variant="body2">Area: {building.area} m²</MDTypography>
@@ -170,7 +171,7 @@ function BuildingCardFeed({ building }) {
           <Grid container spacing={3} direction="column">
             <Grid item>
               <img
-                src={building.imageUrl || defaultImage}
+                src={building.image_url || defaultImage}
                 alt="Property"
                 style={{
                   width: "100%",

@@ -9,6 +9,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Card from "@mui/material/Card";
 import MasterCard from "examples/Cards/MasterCard";
 import Tabs from "@mui/material/Tabs";
+import Sidenav from "examples/Sidenav";
 import Tab from "@mui/material/Tab";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
@@ -21,6 +22,7 @@ import HomeIcon from "@mui/icons-material/Home";
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import routes from "routes";
 import Footer from "examples/Footer";
 import ProfileInfoCard from "examples/Cards/InfoCards/ProfileInfoCard";
 import PostCard from "examples/Cards/PostCards/PostCard"; // Make sure to create this component
@@ -29,8 +31,7 @@ import BuildingCard from "examples/Cards/BuildingCards/BuildingCard"; // Make su
 // Overview page components
 import Header from "layouts/profile/components/Header";
 import PlatformSettings from "layouts/profile/components/PlatformSettings";
-import routes from "routes";
-import Sidenav from "examples/Sidenav";
+
 // Images
 import homeDecor1 from "assets/images/home-decor-1.jpg";
 import homeDecor2 from "assets/images/home-decor-2.jpg";
@@ -46,6 +47,10 @@ function Overview() {
   const [connectedUser, setConnectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [refreshTriger, setRefreshTriger] = useState(false);
+  const triggerRefresh = () => {
+    setRefreshTriger((prev) => !prev); // Toggling the refresh state
+  };
   const [refrech, setRefrech] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -60,6 +65,19 @@ function Overview() {
     role: "",
     currentUsername: "",
   });
+  // const [userUpdated, setUserUpdated] = useState({
+  //   firstName: "",
+  //   lastName: "",
+  //   username: "",
+  //   email: "",
+  //   phoneNumber: "",
+  //   city: "",
+  //   isActive: "",
+  //   isNotLocked: "",
+  //   profileImage: null,
+  //   role: "",
+  //   currentUsername: "",
+  // });
   const [cities, setCities] = useState([]);
   const [newPostData, setNewPostData] = useState({
     title: "",
@@ -72,6 +90,8 @@ function Overview() {
     rooms: "",
     price: "",
     area: "",
+    city: "",
+    imageFile: null,
     owner: {
       userId: "",
       firstName: "",
@@ -82,10 +102,6 @@ function Overview() {
   });
   const [open, setOpen] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
-  const [refreshTriger, setRefreshTriger] = useState(false);
-  const triggerRefresh = () => {
-    setRefreshTriger((prev) => !prev); // Toggling the refresh state
-  };
   const [cardExpire, setCardExpire] = useState("");
   const [refresh, setrefresh] = useState(false);
   const handleClickOpen = () => {
@@ -96,8 +112,22 @@ function Overview() {
     setOpen(true);
   };
 
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    console.log("Selected file:", file);
+
+    // You can add logic to handle the file upload, such as saving it to formData
+    setFormData((prevState) => ({
+      ...prevState,
+      profileImage: file, // Assuming you're adding the file to formData
+    }));
+  };
   const handleImageChange = (e) => {
     setFormData({ ...formData, profileImage: e.target.files[0] });
+    // console.log("saleeeeem ", userUpdated);
+  };
+  const handlePostImageChange = (e) => {
+    setNewPostData({ ...newPostData, profileImage: e.target.files[0] });
     // console.log("saleeeeem ", userUpdated);
   };
   const handleClose = () => {
@@ -275,6 +305,12 @@ function Overview() {
       city: newValue || "",
     }));
   };
+  const handleBuildingCityChange = (event, newValue) => {
+    setNewBuildingData((prevData) => ({
+      ...prevData,
+      city: newValue || "",
+    }));
+  };
 
   const toQueryString = (data) => {
     return Object.keys(data)
@@ -330,6 +366,13 @@ function Overview() {
   const handleImageFileChange = (e) => {
     const file = e.target.files[0];
     setNewPostData((prevData) => ({
+      ...prevData,
+      imageFile: file, // Store the selected file
+    }));
+  };
+  const handleBuildingImageFileChange = (e) => {
+    const file = e.target.files[0];
+    setNewBuildingData((prevData) => ({
       ...prevData,
       imageFile: file, // Store the selected file
     }));
@@ -421,6 +464,8 @@ function Overview() {
         rooms: newBuildingData.rooms,
         price: newBuildingData.price,
         area: newBuildingData.area, // Par exemple, 150.0
+        imageFile: newBuildingData.imageFile, // Par exemple, 150.0
+        city: newBuildingData.city, // Par exemple, 150.0
         owner: {
           userId: profile.userId, // Utiliser l'ID de l'utilisateur connecté
           firstName: profile.firstName,
@@ -429,15 +474,27 @@ function Overview() {
           email: profile.email,
         },
       };
+      const formData = new FormData();
+      formData.append("type", buildingData.type); // Pass the connected username
+      formData.append("address", buildingData.address);
+      formData.append("rooms", buildingData.rooms);
+      formData.append("price", buildingData.price);
+      formData.append("area", buildingData.area);
+      formData.append("city", buildingData.city);
+      formData.append("ownerUsername", buildingData.owner.username);
+
+      if (buildingData.imageFile) {
+        formData.append("imageFile", buildingData.imageFile); // Append the image file to the form data
+      }
 
       try {
         const response = await fetch("/PI/api/buildings/create", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Spécifier que le type de contenu est JSON
-          },
-          body: JSON.stringify(buildingData), // Convertir l'objet en JSON
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          //   "Content-Type": "application/json", // Spécifier que le type de contenu est JSON
+          // },
+          body: formData, // Convertir l'objet en JSON
         });
 
         if (response.ok) {
@@ -719,9 +776,9 @@ function Overview() {
                             onChange={handleImageFileChange}
                             style={{ margin: "16px 0" }}
                           />
-                          <Button type="submit" variant="contained" color="white" fullWidth>
+                          <MDButton type="submit" variant="gradient" color="success" fullWidth>
                             Add Post
-                          </Button>
+                          </MDButton>
                         </MDBox>
                       )}
 
@@ -735,6 +792,15 @@ function Overview() {
                             onChange={handleNewBuildingChange}
                             fullWidth
                             margin="normal"
+                          />
+                          <Autocomplete
+                            options={cities}
+                            getOptionLabel={(option) => option}
+                            value={newBuildingData.city}
+                            onChange={handleBuildingCityChange}
+                            renderInput={(params) => (
+                              <TextField {...params} label="City" fullWidth margin="normal" />
+                            )}
                           />
                           <TextField
                             label="Address"
@@ -768,9 +834,15 @@ function Overview() {
                             fullWidth
                             margin="normal"
                           />
-                          <Button type="submit" variant="contained" color="white" fullWidth>
+                          <input
+                            accept="image/*"
+                            type="file"
+                            onChange={handleBuildingImageFileChange}
+                            style={{ margin: "16px 0" }}
+                          />
+                          <MDButton type="submit" variant="gradient" color="success" fullWidth>
                             Add Building
-                          </Button>
+                          </MDButton>
                         </MDBox>
                       )}
                     </Card>
@@ -846,11 +918,12 @@ function Overview() {
                     <Grid item xs={12} md={6} xl={3} key={post.id}>
                       <PostCard
                         postId={post.id}
-                        image={homeDecor1}
+                        image={post.image_url || homeDecor1}
                         title={post.title}
                         content={post.content}
                         username={post.username}
                         onDeletePost={handleRefrech}
+                        onUpdatePost={handleRefrech}
                         action={{
                           type: "internal",
                           route: `/posts/${post.id}`,
@@ -880,8 +953,9 @@ function Overview() {
                       <Grid item xs={12} md={6} xl={3} key={building.id}>
                         <BuildingCard
                           buildingId={building.id}
-                          image={homeDecor1} // Replace with building image if available
+                          image={building.image_url || homeDecor1} // Replace with building image if available
                           type={building.type}
+                          cityy={building.city}
                           address={building.address}
                           rooms={building.rooms}
                           price={building.price}

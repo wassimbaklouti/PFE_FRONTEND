@@ -15,6 +15,7 @@ import {
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
+import Autocomplete from "@mui/material/Autocomplete";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 
@@ -27,6 +28,7 @@ function BuildingCard({
   price,
   area,
   owner,
+  cityy,
   onDeletePost,
   onUpdatePost,
 }) {
@@ -38,11 +40,39 @@ function BuildingCard({
   const [updatedRooms, setUpdatedRooms] = useState(rooms);
   const [originalRooms, setOriginalRooms] = useState(rooms);
   const [updatedPrice, setUpdatedPrice] = useState(price);
+  const [updatedCity, setUpdatedCity] = useState(cityy);
+  const [updatedImageFile, setUpdatedImageFile] = useState(image);
   const [originalPrice, setOriginalPrice] = useState(price);
   const [updatedArea, setUpdatedArea] = useState(area);
   const [originalArea, setOriginalArea] = useState(area);
   const [ownerDetails, setOwnerDetails] = useState(owner); // Store the owner details
+  const [cities, setCities] = useState([]);
 
+  const fetchCities = async () => {
+    try {
+      const response = await fetch(
+        "http://api.geonames.org/searchJSON?country=TN&maxRows=500&username=bakloutiwassim"
+      );
+      const data = await response.json();
+      if (data.geonames) {
+        const cities = data.geonames.map((city) => city.name);
+        setCities(cities);
+      } else {
+        console.error("No cities found");
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  };
+
+  const handleCityChange = (event, newValue) => {
+    setUpdatedCity(newValue);
+  };
+
+  const handleBuildingImageFileChange = (e) => {
+    const file = e.target.files[0];
+    setUpdatedImageFile(file);
+  };
   // Fetch the connected user's profile and set owner details
   const fetchUserProfile = async () => {
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
@@ -71,7 +101,8 @@ function BuildingCard({
   };
 
   useEffect(() => {
-    fetchUserProfile(); // Call fetchUserProfile when the component mounts
+    fetchUserProfile();
+    fetchCities(); // Call fetchUserProfile when the component mounts
   }, []);
 
   // Function to handle opening the update dialog
@@ -94,6 +125,8 @@ function BuildingCard({
         rooms: updatedRooms,
         price: updatedPrice,
         area: updatedArea,
+        city: updatedCity,
+        imageFile: updatedImageFile,
         owner: {
           userId: ownerDetails.userId, // Include userId from the owner details
           firstName: ownerDetails.firstName,
@@ -107,13 +140,26 @@ function BuildingCard({
           ratingCount: ownerDetails.ratingCount,
         },
       };
+      const formData = new FormData();
+      formData.append("type", buildingData.type); // Pass the connected username
+      formData.append("address", buildingData.address);
+      formData.append("rooms", buildingData.rooms);
+      formData.append("price", buildingData.price);
+      formData.append("area", buildingData.area);
+      formData.append("city", buildingData.city);
+      formData.append("ownerUsername", buildingData.owner.username);
 
-      console.log("Updated building data: ", buildingData);
+      if (buildingData.imageFile) {
+        formData.append("imageFile", buildingData.imageFile); // Append the image file to the form data
+      }
+      // console.log("Updated building data: ", buildingData);
       // Send the PUT request to the backend
-      const response = await axios.put(`/PI/api/buildings/${buildingId}`, buildingData, {
-        headers: {
-          "Content-Type": "application/json", // Indicate that we are sending JSON
-        },
+      const response = await fetch(`/PI/api/buildings/${buildingId}`, {
+        method: "PUT",
+        // headers: {
+        //   "Content-Type": "application/json", // Indicate that we are sending JSON
+        // },
+        body: formData,
       });
 
       console.log("Building updated successfully:", response.data);
@@ -159,11 +205,12 @@ function BuildingCard({
     >
       <MDBox position="relative" width="100.25%" shadow="xl" borderRadius="xl">
         <CardMedia
-          src={image}
+          src={`${image}?${new Date().getTime()}`}
           component="img"
           title={type}
           sx={{
             maxWidth: "100%",
+            aspectRatio: "1.6",
             margin: 0,
             objectFit: "cover",
             objectPosition: "center",
@@ -174,6 +221,11 @@ function BuildingCard({
         <MDBox mb={1}>
           <MDTypography variant="h5" textTransform="capitalize">
             {type}
+          </MDTypography>
+        </MDBox>
+        <MDBox mb={1}>
+          <MDTypography variant="button" fontWeight="light" color="text">
+            City: {cityy}
           </MDTypography>
         </MDBox>
         <MDBox mb={1}>
@@ -218,6 +270,15 @@ function BuildingCard({
             value={updatedType}
             onChange={(e) => setUpdatedType(e.target.value)}
           />
+          <Autocomplete
+            options={cities}
+            getOptionLabel={(option) => option}
+            value={updatedCity}
+            onChange={handleCityChange}
+            renderInput={(params) => (
+              <TextField {...params} label="City" fullWidth margin="normal" />
+            )}
+          />
           <TextField
             margin="dense"
             label="Address"
@@ -256,10 +317,10 @@ function BuildingCard({
           />
           {/* File input for updating the image */}
           <input
-            type="file"
             accept="image/*"
-            // You can handle image upload logic here if necessary
-            style={{ marginTop: "1rem" }}
+            type="file"
+            onChange={handleBuildingImageFileChange}
+            style={{ margin: "16px 0" }}
           />
         </DialogContent>
         <DialogActions>
@@ -280,6 +341,7 @@ BuildingCard.propTypes = {
   buildingId: PropTypes.string.isRequired,
   image: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
+  cityy: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
   rooms: PropTypes.number.isRequired,
   price: PropTypes.number.isRequired,

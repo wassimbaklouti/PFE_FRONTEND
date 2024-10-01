@@ -6,6 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
+import Autocomplete from "@mui/material/Autocomplete";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
@@ -31,8 +32,28 @@ function Houses() {
   const [rooms, setRooms] = useState("");
   const [price, setPrice] = useState("");
   const [area, setArea] = useState("");
+  const [city, setCity] = useState("");
 
   const role = localStorage.getItem("role");
+
+  const [cities, setCities] = useState([]);
+
+  const fetchCities = async () => {
+    try {
+      const response = await fetch(
+        "http://api.geonames.org/searchJSON?country=TN&maxRows=500&username=bakloutiwassim"
+      );
+      const data = await response.json();
+      if (data.geonames) {
+        const cities = data.geonames.map((city) => city.name);
+        setCities(cities);
+      } else {
+        console.error("No cities found");
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  };
 
   // Fetch Houses data
   useEffect(() => {
@@ -51,6 +72,7 @@ function Houses() {
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
       });
+    fetchCities();
   }, []);
 
   // Handle filtering logic
@@ -70,12 +92,15 @@ function Houses() {
       if (area) {
         updatedHouses = updatedHouses.filter((house) => house.area >= parseInt(area));
       }
+      if (city) {
+        updatedHouses = updatedHouses.filter((house) => house.city === city);
+      }
 
       setFilteredHouses(updatedHouses);
     };
 
     filterHouses();
-  }, [type, rooms, price, area, houses]);
+  }, [type, rooms, price, area, houses, city]);
 
   return (
     <DashboardLayout>
@@ -90,15 +115,15 @@ function Houses() {
 
         {/* Filters */}
         <MDBox mb={3}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={3}>
+          <Grid container spacing={2} justifyContent="space-between">
+            <Grid item xs={12} md={2}>
               <TextField
                 select
                 label="Type"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 fullWidth
-                variant="outlined" // Ensure you are using the outlined variant
+                variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     height: "44px", // Adjust the height here
@@ -118,7 +143,28 @@ function Houses() {
                 <MenuItem value="villa">Villa</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
+              <Autocomplete
+                options={cities}
+                getOptionLabel={(option) => option}
+                value={city}
+                onChange={(e, newValue) => setCity(newValue)} // Fix the event handler
+                renderInput={(params) => <TextField {...params} label="City" fullWidth />}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    height: "44px", // Adjust the height here
+                    borderRadius: "5px", // Optional: Customize border radius
+                  },
+                  "& .MuiInputLabel-root": {
+                    // top: "-5px", // Adjust label positioning if necessary
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#d2d6da", // Optional: Customize border color
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={2}>
               <TextField
                 label="Rooms"
                 type="number"
@@ -127,7 +173,7 @@ function Houses() {
                 fullWidth
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
               <TextField
                 label="Max Price"
                 type="number"
@@ -136,7 +182,7 @@ function Houses() {
                 fullWidth
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={2}>
               <TextField
                 label="Min Area"
                 type="number"

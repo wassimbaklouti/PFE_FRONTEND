@@ -317,6 +317,9 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
                 borderRadius: "10px",
                 maxHeight: "400px",
                 objectFit: "cover",
+                display: "block",
+                margin: "auto",
+                maxWidth: "100%",
               }}
             />
           )}

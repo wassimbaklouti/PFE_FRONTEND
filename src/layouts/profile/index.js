@@ -89,7 +89,7 @@ function Overview() {
     price: "",
     area: "",
     city: "",
-    city: "",
+    imageFile: null,
     owner: {
       userId: "",
       firstName: "",
@@ -462,6 +462,8 @@ function Overview() {
         rooms: newBuildingData.rooms,
         price: newBuildingData.price,
         area: newBuildingData.area, // Par exemple, 150.0
+        imageFile: newBuildingData.imageFile, // Par exemple, 150.0
+        city: newBuildingData.city, // Par exemple, 150.0
         owner: {
           userId: profile.userId, // Utiliser l'ID de l'utilisateur connecté
           firstName: profile.firstName,
@@ -470,15 +472,27 @@ function Overview() {
           email: profile.email,
         },
       };
+      const formData = new FormData();
+      formData.append("type", buildingData.type); // Pass the connected username
+      formData.append("address", buildingData.address);
+      formData.append("rooms", buildingData.rooms);
+      formData.append("price", buildingData.price);
+      formData.append("area", buildingData.area);
+      formData.append("city", buildingData.city);
+      formData.append("ownerUsername", buildingData.owner.username);
+
+      if (buildingData.imageFile) {
+        formData.append("imageFile", buildingData.imageFile); // Append the image file to the form data
+      }
 
       try {
         const response = await fetch("/PI/api/buildings/create", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Spécifier que le type de contenu est JSON
-          },
-          body: JSON.stringify(buildingData), // Convertir l'objet en JSON
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          //   "Content-Type": "application/json", // Spécifier que le type de contenu est JSON
+          // },
+          body: formData, // Convertir l'objet en JSON
         });
 
         if (response.ok) {
@@ -933,8 +947,9 @@ function Overview() {
                     <Grid item xs={12} md={6} xl={3} key={building.id}>
                       <BuildingCard
                         buildingId={building.id}
-                        image={homeDecor1} // Replace with building image if available
+                        image={building.image_url || homeDecor1} // Replace with building image if available
                         type={building.type}
+                        cityy={building.city}
                         address={building.address}
                         rooms={building.rooms}
                         price={building.price}

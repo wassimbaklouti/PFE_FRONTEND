@@ -116,7 +116,7 @@ function DashboardPostsAdmin() {
                       <PostCardFeed
                         key={post.id}
                         postId={post.id}
-                        image={post.imageUrl || homeDecor1}
+                        image={post.image_url || homeDecor1}
                         title={post.title}
                         content={post.content}
                         author={post.username}
