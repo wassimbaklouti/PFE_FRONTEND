@@ -45,6 +45,7 @@ import team4 from "assets/images/team-4.jpg";
 function Overview() {
   const [profile, setProfile] = useState(null);
   const [connectedUser, setConnectedUser] = useState(null);
+  const [requestError, setRequestError] = useState("");
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({
     title: "",
@@ -343,6 +344,7 @@ function Overview() {
       ...prevErrors,
       [name]: "", // Clear error when user starts typing
     }));
+    setRequestError("");
   };
 
   const handleCityChange = (event, newValue) => {
@@ -438,6 +440,8 @@ function Overview() {
           triggerRefresh();
           setEditMode(false); // Exit edit mode after successful update
         } else {
+          const errorData = await response.json(); // Parse the response as JSON
+          setRequestError(errorData.message);
           console.error("Failed to update profile");
         }
       } catch (error) {
@@ -746,6 +750,17 @@ function Overview() {
                       >
                         <MDBox component="form" onSubmit={handleSubmit}>
                           <MDTypography variant="h6">Edit Profile</MDTypography>
+                          {requestError && (
+                            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+                              <MDTypography
+                                color="error"
+                                variant="caption"
+                                style={{ fontSize: "1rem" }}
+                              >
+                                {requestError}
+                              </MDTypography>
+                            </div>
+                          )}
                           <TextField
                             label="Firstname"
                             name="firstName"

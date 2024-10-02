@@ -71,6 +71,7 @@ function TablesAdmin() {
 
   const openSuccessSB = () => setSuccessSB(true);
   const closeSuccessSB = () => setSuccessSB(false);
+  const [requestError, setRequestError] = useState("");
   const [errors, setErrors] = useState({
     title: "",
     content: "",
@@ -112,6 +113,7 @@ function TablesAdmin() {
       ...prevErrors,
       [name]: "", // Clear error when user starts typing
     }));
+    setRequestError("");
   };
 
   const handleImageChange = (e) => {
@@ -195,6 +197,8 @@ function TablesAdmin() {
         handleClose();
         window.location.reload();
       } else {
+        const errorData = await response.json(); // Parse the response as JSON
+        setRequestError(errorData.message);
         console.error("Failed to add new user");
       }
     } catch (error) {
@@ -300,6 +304,13 @@ function TablesAdmin() {
             </div>
           ) : (
             <>
+              {requestError && (
+                <div style={{ textAlign: "center", marginBottom: "16px" }}>
+                  <MDTypography color="error" variant="caption" style={{ fontSize: "1rem" }}>
+                    {requestError}
+                  </MDTypography>
+                </div>
+              )}
               <TextField
                 autoFocus
                 margin="dense"

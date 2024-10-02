@@ -52,7 +52,7 @@ const fetchCities = async () => {
 function TablesProertyowner() {
   const { columns, rows } = authorsTableData();
   const { columns: pColumns, rows: pRows } = projectsTableData();
-
+  const [requestError, setRequestError] = useState("");
   const [open, setOpen] = useState(false);
   const [cities, setCities] = useState([]);
   const [newUser, setNewUser] = useState({
@@ -112,6 +112,7 @@ function TablesProertyowner() {
       ...prevErrors,
       [name]: "", // Clear error when user starts typing
     }));
+    setRequestError("");
   };
 
   const handleImageChange = (e) => {
@@ -195,6 +196,8 @@ function TablesProertyowner() {
         handleClose();
         window.location.reload();
       } else {
+        const errorData = await response.json(); // Parse the response as JSON
+        setRequestError(errorData.message);
         console.error("Failed to add new user");
       }
     } catch (error) {
@@ -300,6 +303,13 @@ function TablesProertyowner() {
             </div>
           ) : (
             <>
+              {requestError && (
+                <div style={{ textAlign: "center", marginBottom: "16px" }}>
+                  <MDTypography color="error" variant="caption" style={{ fontSize: "1rem" }}>
+                    {requestError}
+                  </MDTypography>
+                </div>
+              )}
               <TextField
                 autoFocus
                 margin="dense"
