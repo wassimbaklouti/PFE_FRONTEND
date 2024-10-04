@@ -333,9 +333,17 @@ function Cover() {
                       value={newUser.expertise}
                       error={!!errors.expertise}
                     >
-                      <MenuItem value="Electricity">Electricity</MenuItem>
-                      <MenuItem value="Plumbing">Plumbing</MenuItem>
-                      <MenuItem value="Painting">Painting</MenuItem>
+                      <MenuItem value="electrician">Electricity</MenuItem>
+                      <MenuItem value="plumber">Plumbing</MenuItem>
+                      <MenuItem value="painter">Painting</MenuItem>
+                      <MenuItem value="gardner">Gardening</MenuItem>
+                      <MenuItem value="houseKeeper">Housekeeping</MenuItem>
+                      <MenuItem value="refrigerationTechnician">Refrigeration Services</MenuItem>
+                      <MenuItem value="homeApplianceTechnician">Home Appliance Repair</MenuItem>
+                      <MenuItem value="mason">masonry</MenuItem>
+                      <MenuItem value="carpenter">carpentry</MenuItem>
+                      <MenuItem value="welder">welding</MenuItem>
+                      <MenuItem value="sosDriver">SOS Service</MenuItem>
                     </Select>
                     {errors.expertise && (
                       <MDTypography color="error" variant="caption">

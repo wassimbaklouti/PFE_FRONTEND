@@ -130,7 +130,7 @@ function BuildingCardFeed({ building }) {
 
   const submitReservation = async () => {
     try {
-      const response = await fetch(`/PI/api/buildings/${building.id}/reservation`, {
+      const response = await fetch(`/PI/api/buildings/${building.id}/reservations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entryDate, exitDate, userId }),
