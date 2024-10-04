@@ -60,6 +60,7 @@ import Carpenters from "layouts/carpenters";
 import Masons from "layouts/masons";
 import Welders from "layouts/welders";
 import Electricians from "layouts/electricians";
+import SosDriver from "layouts/sosDriver";
 import Houses from "layouts/houses";
 import HousesAdmin from "layouts/housesAdmin";
 import SignIn from "layouts/authentication/sign-in";
@@ -285,6 +286,14 @@ const routes = [
     icon: <Icon fontSize="small">format_paint</Icon>,
     route: "/welders",
     component: <Welders />,
+  },
+  {
+    type: "",
+    name: "SosDriver",
+    key: "SosDriver",
+    icon: <Icon fontSize="small">format_paint</Icon>,
+    route: "/sosDriver",
+    component: <SosDriver />,
   },
   {
     type: "",
