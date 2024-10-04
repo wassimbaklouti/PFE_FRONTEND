@@ -39,6 +39,15 @@ function Houses() {
   const role = localStorage.getItem("role");
 
   const [cities, setCities] = useState([]);
+  const [refrech, setRefrech] = useState(false);
+
+  const handleRefrech = () => {
+    if (refrech) {
+      setRefrech(false);
+    } else {
+      setRefrech(true);
+    }
+  };
 
   const fetchCities = async () => {
     try {
@@ -75,7 +84,7 @@ function Houses() {
         console.error("There was a problem with the fetch operation:", error);
       });
     fetchCities();
-  }, []);
+  }, [refrech]);
 
   // Handle filtering logic
   useEffect(() => {
@@ -102,7 +111,7 @@ function Houses() {
     };
 
     filterHouses();
-  }, [type, rooms, price, area, houses, city]);
+  }, [type, rooms, price, area, houses, city, refrech]);
 
   return (
     <DashboardLayout>
@@ -204,7 +213,7 @@ function Houses() {
               {filteredHouses.map((house) => (
                 <Grid item xs={12} md={6} xl={4} key={house.id}>
                   <Elements stripe={stripePromise}>
-                    <BuildingCardFeed building={house} />
+                    <BuildingCardFeed building={house} onDeletePost={handleRefrech} />
                   </Elements>
                 </Grid>
               ))}

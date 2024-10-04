@@ -25,6 +25,15 @@ function DashboardPostsAdmin() {
   const [likesData, setLikesData] = useState({});
   const [commentsData, setCommentsData] = useState({});
   const [loading, setLoading] = useState(true); // Add loading state
+  const [refrech, setRefrech] = useState(false);
+
+  const handleRefrech = () => {
+    if (refrech) {
+      setRefrech(false);
+    } else {
+      setRefrech(true);
+    }
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -83,7 +92,7 @@ function DashboardPostsAdmin() {
     };
 
     fetchPosts();
-  }, []);
+  }, [refrech]);
 
   return (
     <DashboardLayout>
@@ -121,6 +130,7 @@ function DashboardPostsAdmin() {
                         content={post.content}
                         author={post.username}
                         date={formatDate(post.date)}
+                        onDeletePost={handleRefrech}
                         likes={likesData[post.id] || 0}
                         comments={commentsData[post.id] || []}
                       />
