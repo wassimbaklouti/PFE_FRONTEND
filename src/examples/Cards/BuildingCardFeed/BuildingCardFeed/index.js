@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Dialog, Button, Grid, TextField } from "@mui/material";
 import PropTypes from "prop-types";
+import Avatar from "@mui/material/Avatar";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import axios from "axios";
 import MDButton from "components/MDButton";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -19,7 +23,7 @@ const stripePromise = loadStripe(
   "pk_test_51PzmNbIO7soUye2opH2QESx7qqHwXk2Peb5j4qNVvOP38dr42uFrq0ZQhASWpP959Z9gFLyUdQY7sgWe4VOaQW6C00hFofOjGk"
 );
 
-function BuildingCardFeed({ building }) {
+function BuildingCardFeed({ building, onDeletePost }) {
   const [open, setOpen] = useState(false);
   const [openBookingForm, setOpenBookingForm] = useState(false);
   const [openStripe, setOpenStripe] = useState(false);
@@ -147,6 +151,16 @@ function BuildingCardFeed({ building }) {
       setErrorMessage("An error occurred while reserving the property");
     }
   };
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`/PI/api/buildings/${building.id}`); // Updated URL
+      console.log("Building deleted successfully:", response.data);
+      onDeletePost();
+      handleDialogClose();
+    } catch (error) {
+      console.error("Error deleting building:", error);
+    }
+  };
 
   const connectedUser = JSON.parse(localStorage.getItem("connected-user"));
   const userId = connectedUser.id;
@@ -168,6 +182,45 @@ function BuildingCardFeed({ building }) {
       </MDBox>
 
       <Dialog open={open} onClose={handleDialogClose} fullWidth maxWidth="lg">
+        <MDBox
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={1}
+          mt={3.5}
+          ml={2}
+          mr={1}
+        >
+          <MDBox display="flex" alignItems="center">
+            <Avatar
+              alt={building.owner.profileImageUrl}
+              src={building.owner.profileImageUrl || "/static/images/avatar/1.jpg"}
+            />
+            <MDBox ml={2}>
+              <MDTypography variant="h6">
+                {building.owner.firstName} {building.owner.lastName}
+              </MDTypography>
+              {/* <MDTypography variant="caption" color="textSecondary">
+                {date}
+              </MDTypography> */}
+            </MDBox>
+          </MDBox>
+
+          {/* If connected user is an admin, show the delete button in the top right */}
+          {connectedUser?.role === "ROLE_ADMIN" && (
+            <IconButton
+              onClick={handleDelete}
+              sx={{
+                color: "inherit",
+                "&:hover": {
+                  color: "red",
+                },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
+        </MDBox>
         <MDBox p={3}>
           <Grid container spacing={3} direction="column">
             <Grid item>
@@ -183,23 +236,25 @@ function BuildingCardFeed({ building }) {
               />
             </Grid>
             <Grid item>
-              <MDTypography variant="h4">
+              {/* <MDTypography variant="h4">
                 {building.owner.firstName} {building.owner.lastName}
-              </MDTypography>
+              </MDTypography> */}
               <MDTypography variant="body1">Address: {building.address}</MDTypography>
               <MDTypography variant="body1">Type: {building.type}</MDTypography>
               <MDTypography variant="body1">Rooms: {building.rooms}</MDTypography>
               <MDTypography variant="body1">Price: {building.price} €</MDTypography>
               <MDTypography variant="body1">Area: {building.area} m²</MDTypography>
-              <MDButton
-                variant="gradient"
-                color="success" // Sets the color to "success"
-                onClick={handleBookingFormOpen}
-                sx={{ mt: 4, mb: 2 }} // Adds margin-top (mt) and margin-bottom (mb)
-                fullWidth
-              >
-                Book House
-              </MDButton>
+              {connectedUser && (
+                <MDButton
+                  variant="gradient"
+                  color="success" // Sets the color to "success"
+                  onClick={handleBookingFormOpen}
+                  sx={{ mt: 4, mb: 2 }} // Adds margin-top (mt) and margin-bottom (mb)
+                  fullWidth
+                >
+                  Book House
+                </MDButton>
+              )}
               <MDButton
                 variant="gradient"
                 color="warning" // Sets the color to "success"
@@ -304,6 +359,7 @@ function BuildingCardFeed({ building }) {
 }
 
 BuildingCardFeed.propTypes = {
+  onDeletePost: PropTypes.func,
   building: PropTypes.object.isRequired,
 };
 

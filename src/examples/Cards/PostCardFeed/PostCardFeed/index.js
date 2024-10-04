@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import Card from "@mui/material/Card";
+import axios from "axios";
 import CardMedia from "@mui/material/CardMedia";
 import Avatar from "@mui/material/Avatar";
 import EditIcon from "@mui/icons-material/Edit";
@@ -23,7 +24,7 @@ import DialogActions from "@mui/material/DialogActions";
 import ExpandCircleDownRoundedIcon from "@mui/icons-material/ExpandCircleDownRounded";
 import { blue, grey } from "@mui/material/colors";
 
-function PostCardFeed({ postId, image, title, content, author, date, action }) {
+function PostCardFeed({ postId, image, title, content, author, date, action, onDeletePost }) {
   const [likes, setLikes] = useState(0);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
@@ -34,6 +35,7 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingContent, setEditingContent] = useState("");
   const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchConnectedUser = async () => {
@@ -198,6 +200,18 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
     setEditingContent(currentContent);
     setComment(currentContent);
   };
+  const handleDeletePost = async () => {
+    try {
+      const response = await axios.delete(`/PI/api/posts/delete-post/${postId}`);
+      console.log("Post deleted successfully:", response.data);
+      onDeletePost();
+      setDialogOpen(false);
+      // Optionally, you can add logic to remove the post from the UI after deletion,
+      // such as navigating away, showing a confirmation message, etc.
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
 
   return (
     <>
@@ -212,10 +226,11 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
           padding: "16px",
         }}
       >
+        {/* Post details */}
         <MDBox display="flex" alignItems="center" mb={2}>
           <Avatar
             alt={author}
-            src={authorProfile?.profileImageUrl || "/static/images/avatar/1.jpg"} // Fetched profile image
+            src={authorProfile?.profileImageUrl || "/static/images/avatar/1.jpg"}
           />
           <MDBox ml={2}>
             <MDTypography variant="h6">{author}</MDTypography>
@@ -292,17 +307,34 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
       {/* Dialog for showing the full post */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="md">
         <DialogContent>
-          <MDBox display="flex" alignItems="center" mb={2}>
-            <Avatar
-              alt={author}
-              src={authorProfile?.profileImageUrl || "/static/images/avatar/1.jpg"} // Fetched profile image
-            />
-            <MDBox ml={2}>
-              <MDTypography variant="h6">{author}</MDTypography>
-              <MDTypography variant="caption" color="textSecondary">
-                {date}
-              </MDTypography>
+          <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <MDBox display="flex" alignItems="center">
+              <Avatar
+                alt={author}
+                src={authorProfile?.profileImageUrl || "/static/images/avatar/1.jpg"}
+              />
+              <MDBox ml={2}>
+                <MDTypography variant="h6">{author}</MDTypography>
+                <MDTypography variant="caption" color="textSecondary">
+                  {date}
+                </MDTypography>
+              </MDBox>
             </MDBox>
+
+            {/* If connected user is an admin, show the delete button in the top right */}
+            {connectedUser?.role === "ROLE_ADMIN" && (
+              <IconButton
+                onClick={handleDeletePost}
+                sx={{
+                  color: "inherit",
+                  "&:hover": {
+                    color: "red",
+                  },
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
           </MDBox>
 
           <MDTypography variant="h5" gutterBottom>
@@ -327,6 +359,7 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
             {content}
           </MDTypography>
 
+          {/* Comments section */}
           <MDBox mt={3}>
             {comments.map((c, index) => (
               <MDBox
@@ -340,34 +373,54 @@ function PostCardFeed({ postId, image, title, content, author, date, action }) {
                   <MDTypography variant="caption">{c.username}:</MDTypography>
                   <MDTypography variant="body2">{c.content}</MDTypography>
                 </MDBox>
-                {connectedUser?.username === c.username && (
-                  <MDBox display="flex" justifyContent="flex-end" alignItems="center">
-                    <IconButton
-                      onClick={() => handleEditClick(c.id, c.content)}
-                      sx={{
-                        marginLeft: "auto",
-                        color: "inherit", // Default color
-                        "&:hover": {
-                          color: "blue", // Change color to red on hover
-                        },
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleDeleteComment(c.id)}
-                      sx={{
-                        marginLeft: "auto",
-                        color: "inherit", // Default color
-                        "&:hover": {
-                          color: "red", // Change color to red on hover
-                        },
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </MDBox>
-                )}
+
+                {/* Check if the connected user is the author or an admin */}
+                <MDBox display="flex" justifyContent="flex-end" alignItems="center">
+                  {connectedUser?.username === c.username && (
+                    <>
+                      <IconButton
+                        onClick={() => handleEditClick(c.id, c.content)}
+                        sx={{
+                          marginLeft: "auto",
+                          color: "inherit",
+                          "&:hover": {
+                            color: "blue",
+                          },
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDeleteComment(c.id)}
+                        sx={{
+                          marginLeft: "auto",
+                          color: "inherit",
+                          "&:hover": {
+                            color: "red",
+                          },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </>
+                  )}
+
+                  {connectedUser?.role === "ROLE_ADMIN" &&
+                    connectedUser?.username !== c.username && (
+                      <IconButton
+                        onClick={() => handleDeleteComment(c.id)}
+                        sx={{
+                          marginLeft: "auto",
+                          color: "inherit",
+                          "&:hover": {
+                            color: "red",
+                          },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                </MDBox>
               </MDBox>
             ))}
           </MDBox>
@@ -408,6 +461,7 @@ PostCardFeed.propTypes = {
   author: PropTypes.string.isRequired,
   date: PropTypes.string.isRequired,
   action: PropTypes.func,
+  onDeletePost: PropTypes.func,
 };
 
 export default PostCardFeed;
