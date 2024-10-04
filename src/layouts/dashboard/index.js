@@ -51,6 +51,7 @@ function Dashboard() {
     masonry: 0,
     welding: 0,
     houses: 0,
+    SosService: 0,
   });
   const [houseCount, setHouseCount] = useState({
     houses: 0,
@@ -93,6 +94,7 @@ function Dashboard() {
     fetchCount("carpenter", "carpentry");
     fetchCount("mason", "masonry");
     fetchCount("welder", "welding");
+    fetchCount("sosDriver", "SosService");
     // Fetch count for houses
     const fetchHouseCount = async () => {
       try {
@@ -150,6 +152,22 @@ function Dashboard() {
                   label: "than last month",
                 }}
                 path="/electricians" // Ajout du chemin pour redirection
+              />
+            </MDBox>
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <MDBox mb={1.5}>
+              <ComplexStatisticsCard
+                icon="electric_bolt"
+                title="Sos Service"
+                expertiese="sosDriver"
+                count={handymanCounts.SosService}
+                percentage={{
+                  color: "success",
+                  amount: "+3%",
+                  label: "than last month",
+                }}
+                path="/sosDriver" // Ajout du chemin pour redirection
               />
             </MDBox>
           </Grid>
