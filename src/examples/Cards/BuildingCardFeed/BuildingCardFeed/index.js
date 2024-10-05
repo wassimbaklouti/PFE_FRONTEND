@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, Button, Grid, TextField } from "@mui/material";
+import { DateRangePicker } from "react-dates";
+import "react-dates/initialize"; // Required for styling
+import "react-dates/lib/css/_datepicker.css"; // Required for styling
 import PropTypes from "prop-types";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
@@ -32,6 +35,7 @@ function BuildingCardFeed({ building, onDeletePost }) {
   const [loading, setLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [reservations, setReservations] = useState([]);
 
   const stripe = useStripe();
   const elements = useElements();
@@ -39,7 +43,10 @@ function BuildingCardFeed({ building, onDeletePost }) {
   const handleDialogOpen = () => setOpen(true);
   const handleDialogClose = () => setOpen(false);
 
-  const handleBookingFormOpen = () => setOpenBookingForm(true);
+  const handleBookingFormOpen = () => {
+    setOpenBookingForm(true);
+    fetchReservations();
+  };
   const handleBookingFormClose = () => setOpenBookingForm(false);
 
   // Function to check reservation conflict
@@ -69,11 +76,11 @@ function BuildingCardFeed({ building, onDeletePost }) {
     setLoading(true);
     setErrorMessage(""); // Reset error message
     setPaymentSuccess(false);
-
     const noConflict = await checkReservationConflict();
 
     if (noConflict) {
       // No conflict, proceed to payment
+      console.log("a sahbi winek ayy");
       setOpenBookingForm(false);
       setOpenStripe(true);
       setLoading(false);
@@ -134,7 +141,7 @@ function BuildingCardFeed({ building, onDeletePost }) {
 
   const submitReservation = async () => {
     try {
-      const response = await fetch(`/PI/api/buildings/${building.id}/reservations`, {
+      const response = await fetch(`/PI/api/buildings/${building.id}/reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entryDate, exitDate, userId }),
@@ -146,6 +153,28 @@ function BuildingCardFeed({ building, onDeletePost }) {
 
       console.log("Reservation successful");
       setOpenStripe(false);
+    } catch (error) {
+      console.error("Reservation Error:", error);
+      setErrorMessage("An error occurred while reserving the property");
+    }
+  };
+  const fetchReservations = async () => {
+    try {
+      const response = await fetch(`/PI/api/buildings/${building.id}/reservations`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        // body: JSON.stringify({ entryDate, exitDate, userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch reservations");
+      }
+      if (response.ok) {
+        const reservationsData = await response.json();
+        setReservations(reservationsData);
+      }
+      console.log("reservations ya l wess : ", reservations);
+      console.log("reservations ya l wess : ", response);
     } catch (error) {
       console.error("Reservation Error:", error);
       setErrorMessage("An error occurred while reserving the property");
@@ -164,6 +193,22 @@ function BuildingCardFeed({ building, onDeletePost }) {
 
   const connectedUser = JSON.parse(localStorage.getItem("connected-user"));
   const userId = connectedUser.id;
+  const [focusedInput, setFocusedInput] = useState(null);
+  const disabledStartDate = new Date("2024-10-10");
+  const disabledEndDate = new Date("2024-10-15");
+
+  // Function to determine if a date should be blocked
+  const isDayBlocked = (day) => {
+    return reservations.some((range) => day.isBetween(range.entryDate, range.exitDate, null, "[]"));
+  };
+
+  useEffect(() => {
+    if (openBookingForm) {
+      setFocusedInput("startDate"); // Focus on start date by default
+    } else {
+      setFocusedInput(null); // Reset when the dialog closes
+    }
+  }, [openBookingForm]);
 
   return (
     <div>
@@ -269,36 +314,49 @@ function BuildingCardFeed({ building, onDeletePost }) {
         </MDBox>
       </Dialog>
 
-      <Dialog open={openBookingForm} onClose={handleBookingFormClose} fullWidth maxWidth="md">
+      <Dialog
+        open={openBookingForm}
+        onClose={handleBookingFormClose}
+        fullWidth
+        maxWidth="lg"
+        sx={{
+          "& .MuiDialog-paper": {
+            width: "80%", // Set the dialog width
+            height: "450px", // Set a max height if needed
+          },
+        }}
+      >
         <MDBox p={4}>
           <MDTypography variant="h6">Book House</MDTypography>
-          <TextField
-            label="Entry Date"
-            type="date"
-            value={entryDate}
-            onChange={(e) => setEntryDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            label="Leave Date"
-            type="date"
-            value={exitDate}
-            onChange={(e) => setExitDate(e.target.value)}
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-            }}
-            sx={{ mt: 2 }}
-          />
-          {errorMessage && (
-            <MDTypography variant="body2" color="error" mt={2}>
-              {errorMessage}
-            </MDTypography>
-          )}
+          <MDBox
+            p={2}
+            display="flex" // Set to flex to center contents
+            flexDirection="column" // Stack items vertically
+            // justifyContent="center" // Center content vertically
+            alignItems="center" // Center content horizontally
+            height="90%" // Optional: Set height to full
+          >
+            <DateRangePicker
+              startDate={entryDate} // Use entryDate state
+              startDateId="your_unique_start_date_id" // Unique ID for start date
+              endDate={exitDate} // Use exitDate state
+              endDateId="your_unique_end_date_id" // Unique ID for end date
+              onDatesChange={({ startDate, endDate }) => {
+                console.log("Dates Changing - Start:", startDate, "End:", endDate); // Log date changes
+                setEntryDate(startDate); // Update entry date
+                setExitDate(endDate); // Update exit date
+              }}
+              focusedInput={focusedInput} // Use focusedInput state
+              onFocusChange={(focusedInput) => {
+                console.log("Focused Input Changed:", focusedInput); // Log focus changes
+                setFocusedInput(focusedInput); // Update focusedInput state
+              }} // Update focusedInput state
+              isOutsideRange={() => false} // Allow selection of any date
+              isDayBlocked={isDayBlocked}
+              displayFormat="DD/MM/YYYY" // Optional: Format to display dates
+              style={{ width: "100%" }}
+            />
+          </MDBox>
           <MDButton
             variant="gradient"
             color="success"
@@ -319,7 +377,6 @@ function BuildingCardFeed({ building, onDeletePost }) {
           </MDButton>
         </MDBox>
       </Dialog>
-
       {openStripe && (
         <Dialog open={openStripe} onClose={() => setOpenStripe(false)} fullWidth maxWidth="md">
           <MDBox p={4}>
