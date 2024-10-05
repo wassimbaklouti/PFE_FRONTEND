@@ -192,7 +192,10 @@ function BuildingCardFeed({ building, onDeletePost }) {
   };
 
   const connectedUser = JSON.parse(localStorage.getItem("connected-user"));
-  const userId = connectedUser.id;
+  if (connectedUser) {
+    const userId = connectedUser.id;
+  }
+
   const [focusedInput, setFocusedInput] = useState(null);
   const disabledStartDate = new Date("2024-10-10");
   const disabledEndDate = new Date("2024-10-15");
