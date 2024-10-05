@@ -13,8 +13,9 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
+import BasicLayout from "layouts/authentication/components/BasicLayout";
 import CoverLayout from "layouts/authentication/components/CoverLayout";
-import bgImage from "assets/images/bg-sign-up-cover.jpeg";
+import bgImage from "assets/images/sign_up_image.jpg";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
@@ -165,7 +166,7 @@ function Cover() {
   return (
     <>
       <DashboardNavbar />
-      <CoverLayout image={bgImage}>
+      <BasicLayout image={bgImage}>
         <Card sx={{ width: "150%", maxWidth: "800px", mx: "auto", marginLeft: "-110px" }}>
           <MDBox
             variant="gradient"
@@ -412,7 +413,7 @@ function Cover() {
             </MDBox>
           </MDBox>
         </Card>
-      </CoverLayout>
+      </BasicLayout>
     </>
   );
 }
