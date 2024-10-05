@@ -30,6 +30,8 @@ function Cover() {
     city: "",
     expertise: "",
     role: "ROLE_USER",
+    dateDeb: "", // Start date field for handyman
+    dateFin: "", // End date field for handyman
   });
 
   const [formType, setFormType] = useState("user");
@@ -69,15 +71,22 @@ function Cover() {
 
     // Check for empty fields
     Object.keys(newUser).forEach((key) => {
-      if (newUser[key] === "" && key !== "expertise") {
+      if (newUser[key] === "" && key !== "expertise" && key !== "dateDeb" && key !== "dateFin") {
         newErrors[key] = `${key} is required`;
         valid = false;
       }
     });
 
-    if (formType === "handyman" && newUser.expertise === "") {
-      newErrors.expertise = "Expertise is required for handymen";
-      valid = false;
+    if (formType === "handyman") {
+      if (newUser.expertise === "") {
+        newErrors.expertise = "Expertise is required for handymen";
+        valid = false;
+      }
+      if (newUser.dateDeb === "" || newUser.dateFin === "") {
+        newErrors.dateDeb = "Start time is required";
+        newErrors.dateFin = "End time is required";
+        valid = false;
+      }
     }
 
     // Email validation
@@ -115,6 +124,10 @@ function Cover() {
     const data = {
       ...newUser,
       role,
+      datetravail: {
+        dateDeb: newUser.dateDeb, // Pass the start time
+        dateFin: newUser.dateFin, // Pass the end time
+      },
     };
 
     try {
@@ -351,6 +364,43 @@ function Cover() {
                       </MDTypography>
                     )}
                   </FormControl>
+                  <>
+                    <MDBox mb={2}>
+                      <MDInput
+                        type="time"
+                        label="Work Start Time"
+                        name="dateDeb"
+                        variant="standard"
+                        fullWidth
+                        onChange={onChangeInput}
+                        value={newUser.dateDeb}
+                        error={!!errors.dateDeb}
+                      />
+                      {errors.dateDeb && (
+                        <MDTypography color="error" variant="caption">
+                          {errors.dateDeb}
+                        </MDTypography>
+                      )}
+                    </MDBox>
+
+                    <MDBox mb={2}>
+                      <MDInput
+                        type="time"
+                        label="Work End Time"
+                        name="dateFin"
+                        variant="standard"
+                        fullWidth
+                        onChange={onChangeInput}
+                        value={newUser.dateFin}
+                        error={!!errors.dateFin}
+                      />
+                      {errors.dateFin && (
+                        <MDTypography color="error" variant="caption">
+                          {errors.dateFin}
+                        </MDTypography>
+                      )}
+                    </MDBox>
+                  </>
                 </MDBox>
               )}
 

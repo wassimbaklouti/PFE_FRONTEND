@@ -27,6 +27,8 @@ function DefaultProjectCard({
   handymanUsername,
   phoneNumber,
   city,
+  dateDeb,
+  dateFin,
   userUsername,
 }) {
   const [rating, setRating] = useState(0); // Overall rating
@@ -217,6 +219,16 @@ function DefaultProjectCard({
               {city}
             </MDTypography>
           </MDBox>
+          <MDBox mb={3} lineHeight={0}>
+            <MDTypography variant="button" fontWeight="light" color="text">
+              {dateDeb}
+            </MDTypography>
+          </MDBox>
+          <MDBox mb={3} lineHeight={0}>
+            <MDTypography variant="button" fontWeight="light" color="text">
+              {dateFin}
+            </MDTypography>
+          </MDBox>
 
           {/* Overall rating display */}
           <MDBox mb={3} display="flex" alignItems="center">
@@ -334,6 +346,8 @@ DefaultProjectCard.propTypes = {
   description: PropTypes.string.isRequired,
   phoneNumber: PropTypes.number.isRequired,
   city: PropTypes.string.isRequired,
+  dateDeb: PropTypes.string.isRequired,
+  dateFin: PropTypes.string.isRequired,
   action: PropTypes.shape({
     type: PropTypes.oneOf(["internal", "external"]),
     route: PropTypes.string,

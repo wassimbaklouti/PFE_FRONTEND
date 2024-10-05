@@ -105,6 +105,12 @@ function HomeApplianceTechnicians() {
                     handymanUsername={homeApplianceTechnician.username}
                     phoneNumber={homeApplianceTechnician.phoneNumber}
                     city={`City : ${homeApplianceTechnician.city}`}
+                    dateDeb={`Work Start Time: ${
+                      homeApplianceTechnician.datetravail?.dateDeb || "N/A"
+                    }`}
+                    dateFin={`Work end Time: ${
+                      homeApplianceTechnician.datetravail?.dateFin || "N/A"
+                    }`}
                     action={{
                       type: "internal",
                       route: `/pages/homeApplianceTechnicians/homeApplianceTechnician-overview/${homeApplianceTechnician.userId}`, // Met à jour le chemin avec l'ID du plombier
