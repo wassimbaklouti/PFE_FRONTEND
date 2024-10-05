@@ -17,6 +17,9 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 // Stripe components
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { DateRangePicker } from "react-dates";
+import "react-dates/initialize"; // Ensure styles are initialized
+import "react-dates/lib/css/_datepicker.css"; // Import CSS for date picker
 
 // Load Stripe with your public key
 const stripePromise = loadStripe(
@@ -33,6 +36,10 @@ function Houses() {
   const [price, setPrice] = useState("");
   const [area, setArea] = useState("");
   const [city, setCity] = useState("");
+
+  const [entryDate, setEntryDate] = useState(null);
+  const [exitDate, setExitDate] = useState(null);
+  const [focusedInput, setFocusedInput] = useState(null);
 
   const role = localStorage.getItem("role");
 
@@ -77,7 +84,7 @@ function Houses() {
 
   // Handle filtering logic
   useEffect(() => {
-    const filterHouses = () => {
+    const filterHouses = async () => {
       let updatedHouses = houses;
 
       if (type) {
@@ -96,11 +103,41 @@ function Houses() {
         updatedHouses = updatedHouses.filter((house) => house.city === city);
       }
 
+      if (entryDate && exitDate) {
+        // Date range conflict check
+        const availableHouses = [];
+        for (let house of updatedHouses) {
+          const isAvailable = await checkReservationConflict(house);
+          if (isAvailable) {
+            availableHouses.push(house);
+          }
+        }
+        updatedHouses = availableHouses;
+      }
+
       setFilteredHouses(updatedHouses);
     };
 
     filterHouses();
-  }, [type, rooms, price, area, houses, city]);
+  }, [type, rooms, price, area, houses, city, entryDate, exitDate]);
+
+  const checkReservationConflict = async (house) => {
+    try {
+      const response = await fetch(`/PI/api/buildings/${house.id}/check-reservation-conflict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryDate, exitDate }),
+      });
+
+      if (!response.ok) {
+        return false; // Conflict exists
+      }
+      return true; // No conflict
+    } catch (error) {
+      console.error("Error checking reservation conflict:", error);
+      return false; // Assume conflict in case of error
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -126,14 +163,11 @@ function Houses() {
                 variant="outlined"
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    height: "44px", // Adjust the height here
-                    borderRadius: "5px", // Optional: Customize border radius
-                  },
-                  "& .MuiInputLabel-root": {
-                    // top: "-5px", // Adjust label positioning if necessary
+                    height: "44px",
+                    borderRadius: "5px",
                   },
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#d2d6da", // Optional: Customize border color
+                    borderColor: "#d2d6da",
                   },
                 }}
               >
@@ -143,27 +177,23 @@ function Houses() {
                 <MenuItem value="villa">Villa</MenuItem>
               </TextField>
             </Grid>
+
             <Grid item xs={12} md={2}>
               <Autocomplete
                 options={cities}
                 getOptionLabel={(option) => option}
                 value={city}
-                onChange={(e, newValue) => setCity(newValue)} // Fix the event handler
+                onChange={(e, newValue) => setCity(newValue)}
                 renderInput={(params) => <TextField {...params} label="City" fullWidth />}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    height: "44px", // Adjust the height here
-                    borderRadius: "5px", // Optional: Customize border radius
-                  },
-                  "& .MuiInputLabel-root": {
-                    // top: "-5px", // Adjust label positioning if necessary
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#d2d6da", // Optional: Customize border color
+                    height: "44px",
+                    borderRadius: "5px",
                   },
                 }}
               />
             </Grid>
+
             <Grid item xs={12} md={2}>
               <TextField
                 label="Rooms"
@@ -173,6 +203,7 @@ function Houses() {
                 fullWidth
               />
             </Grid>
+
             <Grid item xs={12} md={2}>
               <TextField
                 label="Max Price"
@@ -182,6 +213,7 @@ function Houses() {
                 fullWidth
               />
             </Grid>
+
             <Grid item xs={12} md={2}>
               <TextField
                 label="Min Area"
@@ -190,6 +222,54 @@ function Houses() {
                 onChange={(e) => setArea(e.target.value)}
                 fullWidth
               />
+            </Grid>
+
+            {/* Date Range Picker */}
+            <Grid item xs={12} md={2}>
+              <MDBox
+                sx={{
+                  "& .DateRangePicker": {
+                    width: "100%",
+                    height: "44px",
+                    backgroundColor: "#f0f2f5",
+                    borderRadius: "5px",
+                    "& .DateInput_input": {
+                      height: "44px",
+                      padding: "10px",
+                      borderRadius: "5px",
+                      borderColor: "#d2d6da",
+                      backgroundColor: "#f0f2f5",
+                      // color: "#f0f2f5",
+                    },
+                    "& .DateInput_input__focused": {
+                      borderColor: "#d2d6da",
+                    },
+                    "& .DateRangePickerInput": {
+                      display: "flex",
+                      alignItems: "center",
+                      height: "44px",
+                      backgroundColor: "#f0f2f5",
+                      borderColor: "#d2d6da",
+                    },
+                  },
+                }}
+              >
+                <DateRangePicker
+                  startDate={entryDate}
+                  startDateId="entry_date_id"
+                  endDate={exitDate}
+                  endDateId="exit_date_id"
+                  onDatesChange={({ startDate, endDate }) => {
+                    setEntryDate(startDate);
+                    setExitDate(endDate);
+                  }}
+                  focusedInput={focusedInput}
+                  onFocusChange={(focusedInput) => setFocusedInput(focusedInput)}
+                  displayFormat="DD/MM/YYYY"
+                  numberOfMonths={1}
+                  isOutsideRange={() => false}
+                />
+              </MDBox>
             </Grid>
           </Grid>
         </MDBox>
