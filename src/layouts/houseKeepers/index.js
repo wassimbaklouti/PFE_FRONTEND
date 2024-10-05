@@ -18,27 +18,37 @@ import Footer from "examples/Footer";
 import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
 
 // Placeholder images
-import defaultImage from "assets/images/team-1.jpg"; // Assurez-vous d'avoir une image par défaut
+import defaultImage from "assets/images/team-1.jpg"; // Default image
+import axios from "axios"; // Ensure axios is imported
 
 function HouseKeepers() {
   const [houseKeepers, setHouseKeepers] = useState([]);
   const [filteredHouseKeepers, setFilteredHouseKeepers] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedRating, setSelectedRating] = useState(""); // State to hold the selected rating
   const role = localStorage.getItem("role");
-  // Fetch HouseKeepers data
+
+  // Fetch houseKeepers data
   useEffect(() => {
-    fetch("http://localhost:8089/PI/handymen/houseKeeper") // Votre endpoint API
+    fetch("http://localhost:8089/PI/handymen/houseKeeper")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        return response.json(); // Conversion des données en JSON
+        return response.json();
       })
       .then((data) => {
-        console.log("HouseKeepers data:", data); // Afficher les données dans la console
-        setHouseKeepers(data); // Stockage des données des plombiers
-        setFilteredHouseKeepers(data); // Initialise le filtre avec tous les plombiers
+        console.log("HouseKeepers data:", data);
+        // Fetch ratings for each houseKeeper after fetching their data
+        const houseKeepersWithRatings = data.map(async (houseKeeper) => {
+          const rating = await fetchOverallRating(houseKeeper.username);
+          return { ...houseKeeper, rating };
+        });
+        Promise.all(houseKeepersWithRatings).then((results) => {
+          setHouseKeepers(results);
+          setFilteredHouseKeepers(results);
+        });
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
@@ -60,18 +70,43 @@ function HouseKeepers() {
       });
   }, []);
 
+  // Fetch overall rating
+  const fetchOverallRating = async (handymanUsername) => {
+    try {
+      const response = await axios.get(`/PI/ratings/overall?handymanUsername=${handymanUsername}`);
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching overall rating:", error);
+      return 0; // Return 0 if there's an error
+    }
+  };
+
   // Handle city selection
   const handleCityChange = (event) => {
     const city = event.target.value;
     setSelectedCity(city);
+    filterHouseKeepers(city, selectedRating); // Filter when the city changes
+  };
 
-    // Filter HouseKeepers based on selected city
+  // Handle rating change
+  const handleRatingChange = (event) => {
+    const rating = event.target.value;
+    setSelectedRating(rating);
+    filterHouseKeepers(selectedCity, rating); // Filter when the rating changes
+  };
+
+  // Filter houseKeepers by city and rating
+  const filterHouseKeepers = (city, rating) => {
+    let filtered = houseKeepers;
     if (city) {
-      const filtered = houseKeepers.filter((houseKeeper) => houseKeeper.city === city);
-      setFilteredHouseKeepers(filtered);
-    } else {
-      setFilteredHouseKeepers(houseKeepers);
+      filtered = filtered.filter((houseKeeper) => houseKeeper.city === city);
     }
+    if (rating) {
+      filtered = filtered.filter((houseKeeper) => houseKeeper.rating >= rating);
+    }
+    setFilteredHouseKeepers(filtered);
   };
 
   return (
@@ -85,18 +120,55 @@ function HouseKeepers() {
           <Divider />
         </MDBox>
         <MDBox mb={3}>
-          <FormControlComponent
-            label="Filter by City"
-            value={selectedCity}
-            onChange={handleCityChange}
-            items={cities}
-          />
+          {/* Align dropdowns side by side and center */}
+          <Grid container justifyContent="center" spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="city-label">Filter by City</InputLabel>
+                <Select
+                  labelId="city-label"
+                  id="city-select"
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  sx={{ height: 50 }} // Ensure height matches
+                >
+                  <MenuItem value="">All Cities</MenuItem>
+                  {cities.map((city) => (
+                    <MenuItem key={city} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="rating-label">Filter by Rating</InputLabel>
+                <Select
+                  labelId="rating-label"
+                  id="rating-select"
+                  value={selectedRating}
+                  label="Filter by Rating"
+                  onChange={handleRatingChange}
+                  sx={{ height: 50 }} // Increase the height
+                >
+                  <MenuItem value={0}>0 and above</MenuItem>
+                  <MenuItem value={1}>1 and above</MenuItem>
+                  <MenuItem value={2}>2 and above</MenuItem>
+                  <MenuItem value={3}>3 and above</MenuItem>
+                  <MenuItem value={4}>4 and above</MenuItem>
+                  <MenuItem value={5}>5 stars only</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
           <MDBox mt={3}>
             <Grid container spacing={6}>
               {filteredHouseKeepers.map((houseKeeper, index) => (
                 <Grid item xs={12} md={6} xl={2} key={houseKeeper.userId || index}>
                   <DefaultProjectCard
-                    image={houseKeeper.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
+                    image={houseKeeper.profileImageUrl || defaultImage}
                     label={`HouseKeeper #${index + 1}`}
                     title={`${houseKeeper.firstName} ${houseKeeper.lastName}`}
                     description={`Expertise: ${houseKeeper.expertise}`}
@@ -107,7 +179,7 @@ function HouseKeepers() {
                     dateFin={`Work end Time: ${houseKeeper.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
-                      route: `/pages/houseKeepers/houseKeeper-overview/${houseKeeper.userId}`, // Met à jour le chemin avec l'ID du plombier
+                      route: `/pages/houseKeepers/houseKeeper-overview/${houseKeeper.userId}`,
                       color: "info",
                       label: "View Profile",
                     }}
@@ -124,7 +196,6 @@ function HouseKeepers() {
           </MDBox>
         </MDBox>
       </MDBox>
-      {/* <Footer /> */}
     </DashboardLayout>
   );
 }

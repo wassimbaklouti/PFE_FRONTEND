@@ -18,27 +18,37 @@ import Footer from "examples/Footer";
 import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
 
 // Placeholder images
-import defaultImage from "assets/images/team-1.jpg"; // Assurez-vous d'avoir une image par défaut
+import defaultImage from "assets/images/team-1.jpg"; // Default image
+import axios from "axios"; // Ensure axios is imported
 
 function Plumbers() {
   const [plumbers, setPlumbers] = useState([]);
   const [filteredPlumbers, setFilteredPlumbers] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedRating, setSelectedRating] = useState(""); // State to hold the selected rating
   const role = localStorage.getItem("role");
+
   // Fetch plumbers data
   useEffect(() => {
-    fetch("http://localhost:8089/PI/handymen/plumber") // Votre endpoint API
+    fetch("http://localhost:8089/PI/handymen/plumber")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        return response.json(); // Conversion des données en JSON
+        return response.json();
       })
       .then((data) => {
-        console.log("Plumbers data:", data); // Afficher les données dans la console
-        setPlumbers(data); // Stockage des données des plombiers
-        setFilteredPlumbers(data); // Initialise le filtre avec tous les plombiers
+        console.log("Plumbers data:", data);
+        // Fetch ratings for each plumber after fetching their data
+        const plumbersWithRatings = data.map(async (plumber) => {
+          const rating = await fetchOverallRating(plumber.username);
+          return { ...plumber, rating };
+        });
+        Promise.all(plumbersWithRatings).then((results) => {
+          setPlumbers(results);
+          setFilteredPlumbers(results);
+        });
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
@@ -60,18 +70,43 @@ function Plumbers() {
       });
   }, []);
 
+  // Fetch overall rating
+  const fetchOverallRating = async (handymanUsername) => {
+    try {
+      const response = await axios.get(`/PI/ratings/overall?handymanUsername=${handymanUsername}`);
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching overall rating:", error);
+      return 0; // Return 0 if there's an error
+    }
+  };
+
   // Handle city selection
   const handleCityChange = (event) => {
     const city = event.target.value;
     setSelectedCity(city);
+    filterPlumbers(city, selectedRating); // Filter when the city changes
+  };
 
-    // Filter plumbers based on selected city
+  // Handle rating change
+  const handleRatingChange = (event) => {
+    const rating = event.target.value;
+    setSelectedRating(rating);
+    filterPlumbers(selectedCity, rating); // Filter when the rating changes
+  };
+
+  // Filter plumbers by city and rating
+  const filterPlumbers = (city, rating) => {
+    let filtered = plumbers;
     if (city) {
-      const filtered = plumbers.filter((plumber) => plumber.city === city);
-      setFilteredPlumbers(filtered);
-    } else {
-      setFilteredPlumbers(plumbers);
+      filtered = filtered.filter((plumber) => plumber.city === city);
     }
+    if (rating) {
+      filtered = filtered.filter((plumber) => plumber.rating >= rating);
+    }
+    setFilteredPlumbers(filtered);
   };
 
   return (
@@ -85,18 +120,55 @@ function Plumbers() {
           <Divider />
         </MDBox>
         <MDBox mb={3}>
-          <FormControlComponent
-            label="Filter by City"
-            value={selectedCity}
-            onChange={handleCityChange}
-            items={cities}
-          />
+          {/* Align dropdowns side by side and center */}
+          <Grid container justifyContent="center" spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="city-label">Filter by City</InputLabel>
+                <Select
+                  labelId="city-label"
+                  id="city-select"
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  sx={{ height: 50 }} // Ensure height matches
+                >
+                  <MenuItem value="">All Cities</MenuItem>
+                  {cities.map((city) => (
+                    <MenuItem key={city} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="rating-label">Filter by Rating</InputLabel>
+                <Select
+                  labelId="rating-label"
+                  id="rating-select"
+                  value={selectedRating}
+                  label="Filter by Rating"
+                  onChange={handleRatingChange}
+                  sx={{ height: 50 }} // Increase the height
+                >
+                  <MenuItem value={0}>0 and above</MenuItem>
+                  <MenuItem value={1}>1 and above</MenuItem>
+                  <MenuItem value={2}>2 and above</MenuItem>
+                  <MenuItem value={3}>3 and above</MenuItem>
+                  <MenuItem value={4}>4 and above</MenuItem>
+                  <MenuItem value={5}>5 stars only</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
           <MDBox mt={3}>
             <Grid container spacing={6}>
               {filteredPlumbers.map((plumber, index) => (
                 <Grid item xs={12} md={6} xl={2} key={plumber.userId || index}>
                   <DefaultProjectCard
-                    image={plumber.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
+                    image={plumber.profileImageUrl || defaultImage}
                     label={`Plumber #${index + 1}`}
                     title={`${plumber.firstName} ${plumber.lastName}`}
                     description={`Expertise: ${plumber.expertise}`}
@@ -107,7 +179,7 @@ function Plumbers() {
                     dateFin={`Work end Time: ${plumber.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
-                      route: `/pages/plumbers/plumber-overview/${plumber.userId}`, // Met à jour le chemin avec l'ID du plombier
+                      route: `/pages/plumbers/plumber-overview/${plumber.userId}`,
                       color: "info",
                       label: "View Profile",
                     }}
@@ -124,7 +196,6 @@ function Plumbers() {
           </MDBox>
         </MDBox>
       </MDBox>
-      {/* <Footer /> */}
     </DashboardLayout>
   );
 }

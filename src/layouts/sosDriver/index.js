@@ -1,38 +1,54 @@
 import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import FormControlComponent from "examples/FormControl";
+import Footer from "examples/Footer";
 import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
 
 // Placeholder images
-import defaultImage from "assets/images/team-1.jpg";
+import defaultImage from "assets/images/team-1.jpg"; // Default image
+import axios from "axios"; // Ensure axios is imported
 
 function SosDrivers() {
   const [sosDrivers, setSosDrivers] = useState([]);
   const [filteredSosDrivers, setFilteredSosDrivers] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedSosDriver, setSelectedSosDriver] = useState(null); // State for dialog
+  const [selectedRating, setSelectedRating] = useState(""); // State to hold the selected rating
   const role = localStorage.getItem("role");
-  // Fetch SosDrivers data
+
+  // Fetch sosDrivers data
   useEffect(() => {
     fetch("http://localhost:8089/PI/handymen/sosDriver")
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
       .then((data) => {
-        setSosDrivers(data);
-        setFilteredSosDrivers(data);
+        console.log("SosDrivers data:", data);
+        // Fetch ratings for each sosDriver after fetching their data
+        const sosDriversWithRatings = data.map(async (sosDriver) => {
+          const rating = await fetchOverallRating(sosDriver.username);
+          return { ...sosDriver, rating };
+        });
+        Promise.all(sosDriversWithRatings).then((results) => {
+          setSosDrivers(results);
+          setFilteredSosDrivers(results);
+        });
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
@@ -54,27 +70,43 @@ function SosDrivers() {
       });
   }, []);
 
+  // Fetch overall rating
+  const fetchOverallRating = async (handymanUsername) => {
+    try {
+      const response = await axios.get(`/PI/ratings/overall?handymanUsername=${handymanUsername}`);
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching overall rating:", error);
+      return 0; // Return 0 if there's an error
+    }
+  };
+
   // Handle city selection
   const handleCityChange = (event) => {
     const city = event.target.value;
     setSelectedCity(city);
+    filterSosDrivers(city, selectedRating); // Filter when the city changes
+  };
 
+  // Handle rating change
+  const handleRatingChange = (event) => {
+    const rating = event.target.value;
+    setSelectedRating(rating);
+    filterSosDrivers(selectedCity, rating); // Filter when the rating changes
+  };
+
+  // Filter sosDrivers by city and rating
+  const filterSosDrivers = (city, rating) => {
+    let filtered = sosDrivers;
     if (city) {
-      const filtered = sosDrivers.filter((sosDriver) => sosDriver.city === city);
-      setFilteredSosDrivers(filtered);
-    } else {
-      setFilteredSosDrivers(sosDrivers);
+      filtered = filtered.filter((sosDriver) => sosDriver.city === city);
     }
-  };
-
-  // Handle dialog open
-  const handleOpenDialog = (sosDriver) => {
-    setSelectedSosDriver(sosDriver); // Set selected sosDriver data
-  };
-
-  // Handle dialog close
-  const handleCloseDialog = () => {
-    setSelectedSosDriver(null); // Close dialog
+    if (rating) {
+      filtered = filtered.filter((sosDriver) => sosDriver.rating >= rating);
+    }
+    setFilteredSosDrivers(filtered);
   };
 
   return (
@@ -88,19 +120,56 @@ function SosDrivers() {
           <Divider />
         </MDBox>
         <MDBox mb={3}>
-          <FormControlComponent
-            label="Filter by City"
-            value={selectedCity}
-            onChange={handleCityChange}
-            items={cities}
-          />
+          {/* Align dropdowns side by side and center */}
+          <Grid container justifyContent="center" spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="city-label">Filter by City</InputLabel>
+                <Select
+                  labelId="city-label"
+                  id="city-select"
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  sx={{ height: 50 }} // Ensure height matches
+                >
+                  <MenuItem value="">All Cities</MenuItem>
+                  {cities.map((city) => (
+                    <MenuItem key={city} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="rating-label">Filter by Rating</InputLabel>
+                <Select
+                  labelId="rating-label"
+                  id="rating-select"
+                  value={selectedRating}
+                  label="Filter by Rating"
+                  onChange={handleRatingChange}
+                  sx={{ height: 50 }} // Increase the height
+                >
+                  <MenuItem value={0}>0 and above</MenuItem>
+                  <MenuItem value={1}>1 and above</MenuItem>
+                  <MenuItem value={2}>2 and above</MenuItem>
+                  <MenuItem value={3}>3 and above</MenuItem>
+                  <MenuItem value={4}>4 and above</MenuItem>
+                  <MenuItem value={5}>5 stars only</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
           <MDBox mt={3}>
             <Grid container spacing={6}>
               {filteredSosDrivers.map((sosDriver, index) => (
                 <Grid item xs={12} md={6} xl={2} key={sosDriver.userId || index}>
                   <DefaultProjectCard
                     image={sosDriver.profileImageUrl || defaultImage}
-                    label={`sosDriver #${index + 1}`}
+                    label={`SosDriver #${index + 1}`}
                     title={`${sosDriver.firstName} ${sosDriver.lastName}`}
                     description={`Expertise: ${sosDriver.expertise}`}
                     handymanUsername={sosDriver.username}
@@ -108,31 +177,24 @@ function SosDrivers() {
                     city={`City : ${sosDriver.city}`}
                     dateDeb={`Work Start Time: ${sosDriver.datetravail?.dateDeb || "N/A"}`}
                     dateFin={`Work end Time: ${sosDriver.datetravail?.dateFin || "N/A"}`}
-                    onClick={() => handleOpenDialog(sosDriver)} // Open dialog on card click
+                    action={{
+                      type: "internal",
+                      route: `/pages/sosDrivers/sosDriver-overview/${sosDriver.userId}`,
+                      color: "info",
+                      label: "View Profile",
+                    }}
+                    authors={[
+                      {
+                        image: sosDriver.profileImageUrl || defaultImage,
+                        name: `${sosDriver.firstName} ${sosDriver.lastName}`,
+                      },
+                    ]}
                   />
                 </Grid>
               ))}
             </Grid>
           </MDBox>
         </MDBox>
-
-        {/* Dialog for handyman details */}
-        {selectedSosDriver && (
-          <Dialog open={Boolean(selectedSosDriver)} onClose={handleCloseDialog}>
-            <DialogTitle>{`${selectedSosDriver.firstName} ${selectedSosDriver.lastName}`}</DialogTitle>
-            <DialogContent>
-              <MDTypography variant="body1"> Expertise: {selectedSosDriver.expertise}</MDTypography>
-              <MDTypography variant="body1"> City: {selectedSosDriver.city} </MDTypography>
-              <MDTypography variant="body1">Contact: {selectedSosDriver.phoneNumber}</MDTypography>
-              {/* Add more details here as needed */}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )}
       </MDBox>
     </DashboardLayout>
   );

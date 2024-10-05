@@ -18,27 +18,37 @@ import Footer from "examples/Footer";
 import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
 
 // Placeholder images
-import defaultImage from "assets/images/team-1.jpg"; // Assurez-vous d'avoir une image par défaut
+import defaultImage from "assets/images/team-1.jpg"; // Default image
+import axios from "axios"; // Ensure axios is imported
 
 function Gardners() {
   const [gardners, setGardners] = useState([]);
   const [filteredGardners, setFilteredGardners] = useState([]);
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedRating, setSelectedRating] = useState(""); // State to hold the selected rating
   const role = localStorage.getItem("role");
-  // Fetch Gardners data
+
+  // Fetch gardners data
   useEffect(() => {
-    fetch("http://localhost:8089/PI/handymen/gardner") // Votre endpoint API
+    fetch("http://localhost:8089/PI/handymen/gardner")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        return response.json(); // Conversion des données en JSON
+        return response.json();
       })
       .then((data) => {
-        console.log("Gardners data:", data); // Afficher les données dans la console
-        setGardners(data); // Stockage des données des plombiers
-        setFilteredGardners(data); // Initialise le filtre avec tous les plombiers
+        console.log("Gardners data:", data);
+        // Fetch ratings for each gardner after fetching their data
+        const gardnersWithRatings = data.map(async (gardner) => {
+          const rating = await fetchOverallRating(gardner.username);
+          return { ...gardner, rating };
+        });
+        Promise.all(gardnersWithRatings).then((results) => {
+          setGardners(results);
+          setFilteredGardners(results);
+        });
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
@@ -60,18 +70,43 @@ function Gardners() {
       });
   }, []);
 
+  // Fetch overall rating
+  const fetchOverallRating = async (handymanUsername) => {
+    try {
+      const response = await axios.get(`/PI/ratings/overall?handymanUsername=${handymanUsername}`);
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching overall rating:", error);
+      return 0; // Return 0 if there's an error
+    }
+  };
+
   // Handle city selection
   const handleCityChange = (event) => {
     const city = event.target.value;
     setSelectedCity(city);
+    filterGardners(city, selectedRating); // Filter when the city changes
+  };
 
-    // Filter Gardners based on selected city
+  // Handle rating change
+  const handleRatingChange = (event) => {
+    const rating = event.target.value;
+    setSelectedRating(rating);
+    filterGardners(selectedCity, rating); // Filter when the rating changes
+  };
+
+  // Filter gardners by city and rating
+  const filterGardners = (city, rating) => {
+    let filtered = gardners;
     if (city) {
-      const filtered = gardners.filter((gardner) => gardner.city === city);
-      setFilteredGardners(filtered);
-    } else {
-      setFilteredGardners(gardners);
+      filtered = filtered.filter((gardner) => gardner.city === city);
     }
+    if (rating) {
+      filtered = filtered.filter((gardner) => gardner.rating >= rating);
+    }
+    setFilteredGardners(filtered);
   };
 
   return (
@@ -85,18 +120,55 @@ function Gardners() {
           <Divider />
         </MDBox>
         <MDBox mb={3}>
-          <FormControlComponent
-            label="Filter by City"
-            value={selectedCity}
-            onChange={handleCityChange}
-            items={cities}
-          />
+          {/* Align dropdowns side by side and center */}
+          <Grid container justifyContent="center" spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="city-label">Filter by City</InputLabel>
+                <Select
+                  labelId="city-label"
+                  id="city-select"
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  sx={{ height: 50 }} // Ensure height matches
+                >
+                  <MenuItem value="">All Cities</MenuItem>
+                  {cities.map((city) => (
+                    <MenuItem key={city} value={city}>
+                      {city}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth sx={{ height: 50 }}>
+                <InputLabel id="rating-label">Filter by Rating</InputLabel>
+                <Select
+                  labelId="rating-label"
+                  id="rating-select"
+                  value={selectedRating}
+                  label="Filter by Rating"
+                  onChange={handleRatingChange}
+                  sx={{ height: 50 }} // Increase the height
+                >
+                  <MenuItem value={0}>0 and above</MenuItem>
+                  <MenuItem value={1}>1 and above</MenuItem>
+                  <MenuItem value={2}>2 and above</MenuItem>
+                  <MenuItem value={3}>3 and above</MenuItem>
+                  <MenuItem value={4}>4 and above</MenuItem>
+                  <MenuItem value={5}>5 stars only</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
           <MDBox mt={3}>
             <Grid container spacing={6}>
               {filteredGardners.map((gardner, index) => (
                 <Grid item xs={12} md={6} xl={2} key={gardner.userId || index}>
                   <DefaultProjectCard
-                    image={gardner.profileImageUrl || defaultImage} // Utilise l'image du profil si disponible ou une image par défaut
+                    image={gardner.profileImageUrl || defaultImage}
                     label={`Gardner #${index + 1}`}
                     title={`${gardner.firstName} ${gardner.lastName}`}
                     description={`Expertise: ${gardner.expertise}`}
@@ -107,7 +179,7 @@ function Gardners() {
                     dateFin={`Work end Time: ${gardner.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
-                      route: `/pages/gardners/gardner-overview/${gardner.userId}`, // Met à jour le chemin avec l'ID du plombier
+                      route: `/pages/gardners/gardner-overview/${gardner.userId}`,
                       color: "info",
                       label: "View Profile",
                     }}
@@ -124,7 +196,6 @@ function Gardners() {
           </MDBox>
         </MDBox>
       </MDBox>
-      {/* <Footer /> */}
     </DashboardLayout>
   );
 }
