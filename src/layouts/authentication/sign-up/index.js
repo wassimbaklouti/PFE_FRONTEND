@@ -343,7 +343,7 @@ function Cover() {
                       <MenuItem value="mason">masonry</MenuItem>
                       <MenuItem value="carpenter">carpentry</MenuItem>
                       <MenuItem value="welder">welding</MenuItem>
-                      <MenuItem value="sosDriver">SOS Service</MenuItem>
+                      <MenuItem value="sosDriver">SOS Serice</MenuItem>
                     </Select>
                     {errors.expertise && (
                       <MDTypography color="error" variant="caption">
