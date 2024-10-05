@@ -103,6 +103,8 @@ function HouseKeepers() {
                     handymanUsername={houseKeeper.username}
                     phoneNumber={houseKeeper.phoneNumber}
                     city={`City : ${houseKeeper.city}`}
+                    dateDeb={`Work Start Time: ${houseKeeper.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${houseKeeper.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/houseKeepers/houseKeeper-overview/${houseKeeper.userId}`, // Met à jour le chemin avec l'ID du plombier

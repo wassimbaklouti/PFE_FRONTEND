@@ -105,6 +105,12 @@ function RefrigerationTechnicians() {
                     handymanUsername={refrigerationTechnician.username}
                     phoneNumber={refrigerationTechnician.phoneNumber}
                     city={`City : ${refrigerationTechnician.city}`}
+                    dateDeb={`Work Start Time: ${
+                      refrigerationTechnician.datetravail?.dateDeb || "N/A"
+                    }`}
+                    dateFin={`Work end Time: ${
+                      refrigerationTechnician.datetravail?.dateFin || "N/A"
+                    }`}
                     action={{
                       type: "internal",
                       route: `/pages/refrigerationTechnicians/refrigerationTechnician-overview/${refrigerationTechnician.userId}`, // Met à jour le chemin avec l'ID du plombier

@@ -103,6 +103,8 @@ function Carpenters() {
                     handymanUsername={carpenter.username}
                     phoneNumber={carpenter.phoneNumber}
                     city={`City : ${carpenter.city}`}
+                    dateDeb={`Work Start Time: ${carpenter.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${carpenter.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/carpenters/carpenter-overview/${carpenter.userId}`, // Met à jour le chemin avec l'ID du plombier

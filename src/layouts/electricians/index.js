@@ -106,6 +106,8 @@ function Electricians() {
                     handymanUsername={electrician.username}
                     phoneNumber={electrician.phoneNumber}
                     city={`City : ${electrician.city}`}
+                    dateDeb={`Work Start Time: ${electrician.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${electrician.datetravail?.dateFin || "N/A"}`}
                     onClick={() => handleOpenDialog(electrician)} // Open dialog on card click
                   />
                 </Grid>

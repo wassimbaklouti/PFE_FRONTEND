@@ -104,6 +104,8 @@ function BabySitters() {
                     handymanUsername={babySitter.username}
                     phoneNumber={babySitter.phoneNumber}
                     city={`City : ${babySitter.city}`}
+                    dateDeb={`Work Start Time: ${sosDriver.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${sosDriver.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/babySitters/babySitter-overview/${babySitter.userId}`, // Met à jour le chemin avec l'ID du plombier

@@ -106,6 +106,8 @@ function SosDrivers() {
                     handymanUsername={sosDriver.username}
                     phoneNumber={sosDriver.phoneNumber}
                     city={`City : ${sosDriver.city}`}
+                    dateDeb={`Work Start Time: ${sosDriver.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${sosDriver.datetravail?.dateFin || "N/A"}`}
                     onClick={() => handleOpenDialog(sosDriver)} // Open dialog on card click
                   />
                 </Grid>

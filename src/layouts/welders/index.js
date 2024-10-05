@@ -103,6 +103,8 @@ function Welders() {
                     handymanUsername={welder.username}
                     phoneNumber={welder.phoneNumber}
                     city={`City : ${welder.city}`}
+                    dateDeb={`Work Start Time: ${welder.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${welder.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/welders/welder-overview/${welder.userId}`, // Met à jour le chemin avec l'ID du plombier

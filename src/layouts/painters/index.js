@@ -103,6 +103,8 @@ function Painters() {
                     handymanUsername={painter.username}
                     phoneNumber={painter.phoneNumber}
                     city={`City : ${painter.city}`}
+                    dateDeb={`Work Start Time: ${painter.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${painter.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/painters/painter-overview/${painter.userId}`, // Met à jour le chemin avec l'ID du plombier

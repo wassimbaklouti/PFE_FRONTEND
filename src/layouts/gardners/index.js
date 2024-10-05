@@ -103,6 +103,8 @@ function Gardners() {
                     handymanUsername={gardner.username}
                     phoneNumber={gardner.phoneNumber}
                     city={`City : ${gardner.city}`}
+                    dateDeb={`Work Start Time: ${gardner.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${gardner.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/gardners/gardner-overview/${gardner.userId}`, // Met à jour le chemin avec l'ID du plombier

@@ -103,6 +103,8 @@ function Masons() {
                     handymanUsername={mason.username}
                     phoneNumber={mason.phoneNumber}
                     city={`City : ${mason.city}`}
+                    dateDeb={`Work Start Time: ${mason.datetravail?.dateDeb || "N/A"}`}
+                    dateFin={`Work end Time: ${mason.datetravail?.dateFin || "N/A"}`}
                     action={{
                       type: "internal",
                       route: `/pages/masons/mason-overview/${mason.userId}`, // Met à jour le chemin avec l'ID du plombier
