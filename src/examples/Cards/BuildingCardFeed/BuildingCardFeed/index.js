@@ -36,6 +36,7 @@ function BuildingCardFeed({ building, onDeletePost }) {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [reservations, setReservations] = useState([]);
+  const [paymentAmount, setPaymentAmount] = useState(null);
 
   const stripe = useStripe();
   const elements = useElements();
@@ -46,6 +47,8 @@ function BuildingCardFeed({ building, onDeletePost }) {
   const handleBookingFormOpen = () => {
     setOpenBookingForm(true);
     fetchReservations();
+    setEntryDate("");
+    setExitDate("");
   };
   const handleBookingFormClose = () => setOpenBookingForm(false);
 
@@ -79,6 +82,14 @@ function BuildingCardFeed({ building, onDeletePost }) {
     const noConflict = await checkReservationConflict();
 
     if (noConflict) {
+      const entryDateObj = new Date(entryDate); // assuming entryDate is a state variable or prop
+      const exitDateObj = new Date(exitDate); // assuming exitDate is a state variable or prop
+      const timeDifference = exitDateObj - entryDateObj;
+      const nights = timeDifference / (1000 * 60 * 60 * 24);
+
+      // Multiply price per night by the number of nights
+      const totalAmount = building.price * nights;
+      setPaymentAmount(totalAmount);
       // No conflict, proceed to payment
       console.log("a sahbi winek ayy");
       setOpenBookingForm(false);
@@ -108,7 +119,7 @@ function BuildingCardFeed({ building, onDeletePost }) {
       const response = await fetch("/PI/api/payment/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: building.price, currency: "eur" }), // Price is multiplied by 100 to convert to cents
+        body: JSON.stringify({ amount: paymentAmount, currency: "eur" }), // Price is multiplied by 100 to convert to cents
       });
 
       if (!response.ok) {
@@ -129,8 +140,10 @@ function BuildingCardFeed({ building, onDeletePost }) {
       if (result.error) {
         setErrorMessage(result.error.message);
       } else if (result.paymentIntent.status === "succeeded") {
-        setPaymentSuccess(true);
         await submitReservation();
+        setPaymentSuccess(true);
+        setEntryDate("");
+        setExitDate("");
       }
     } catch (error) {
       setErrorMessage(error.message || "An error occurred during payment");
@@ -138,6 +151,12 @@ function BuildingCardFeed({ building, onDeletePost }) {
       setLoading(false);
     }
   };
+
+  const connectedUser = JSON.parse(localStorage.getItem("connected-user"));
+  const [userId, setUserId] = useState(connectedUser.id);
+  // if (connectedUser) {
+  //   setUserId(connectedUser.id);
+  // }
 
   const submitReservation = async () => {
     try {
@@ -190,11 +209,6 @@ function BuildingCardFeed({ building, onDeletePost }) {
       console.error("Error deleting building:", error);
     }
   };
-
-  const connectedUser = JSON.parse(localStorage.getItem("connected-user"));
-  if (connectedUser) {
-    const userId = connectedUser.id;
-  }
 
   const [focusedInput, setFocusedInput] = useState(null);
   const disabledStartDate = new Date("2024-10-10");
@@ -397,7 +411,7 @@ function BuildingCardFeed({ building, onDeletePost }) {
                 disabled={!stripe || loading}
                 fullWidth
               >
-                {loading ? "Processing..." : `Pay ${building.price} €`}
+                {loading ? "Processing..." : `Pay ${paymentAmount} €`}
               </MDButton>
 
               {paymentSuccess && (
