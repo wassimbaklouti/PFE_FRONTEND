@@ -65,6 +65,7 @@ import Houses from "layouts/houses";
 import HousesAdmin from "layouts/housesAdmin";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+import ResetPassword from "layouts/authentication/reset-password/cover";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -310,6 +311,14 @@ const routes = [
     icon: <Icon fontSize="small">assignment</Icon>,
     route: "/authentication/sign-up",
     component: <SignUp />,
+  },
+  {
+    type: "",
+    name: "ResetPassword",
+    key: "ResetPassword",
+    icon: <Icon fontSize="small">assignment</Icon>,
+    route: "/authentication/ResetPassword",
+    component: <ResetPassword />,
   },
 ];
 

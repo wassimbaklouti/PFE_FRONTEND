@@ -255,7 +255,7 @@ function Overview() {
 
   const fetchPosts = async () => {
     // await fetchConnectedUser();
-    console.log("connected user ya l wess : ", connectedUser);
+    // console.log("connected user ya l wess : ", connectedUser);
     if (connectedUser) {
       const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
       const postsResponse = await fetch(`/PI/api/posts/user/${connectedUser.username}`, {
@@ -1144,68 +1144,86 @@ function Overview() {
             </Grid>
           </MDBox>
 
-          <MDBox p={2}>
-            Posts Section
-            <Grid container spacing={6}>
-              {/* Posts Section */}
-              {posts.length > 0 ? (
-                posts.map((post) => (
-                  <Grid item xs={12} md={6} xl={3} key={post.id}>
-                    <PostCard
-                      postId={post.id}
-                      image={post.image_url || homeDecor1}
-                      title={post.title}
-                      content={post.content}
-                      username={post.username}
-                      onDeletePost={handleRefrech}
-                      onUpdatePost={handleRefrech}
-                      action={{
-                        type: "internal",
-                        route: `/posts/${post.id}`,
-                        color: "info",
-                        label: "View Post",
-                      }}
-                    />
-                  </Grid>
-                ))
-              ) : (
-                <MDTypography variant="h6" align="center" fullWidth>
-                  No posts available
-                </MDTypography>
-              )}
-            </Grid>
-            <>
-              <br />
-            </>
-          </MDBox>
-          {/* Building section */}
-          {profile.role === "ROLE_PROPERTYOWNER" && (
+          <Card>
             <MDBox p={2}>
-              Buildings Section
-              <Grid container spacing={6}>
-                {buildings.length > 0 ? (
-                  buildings.map((building) => (
-                    <Grid item xs={12} md={6} xl={3} key={building.id}>
-                      <BuildingCard
-                        buildingId={building.id}
-                        image={building.image_url || homeDecor1} // Replace with building image if available
-                        type={building.type}
-                        cityy={building.city}
-                        address={building.address}
-                        rooms={building.rooms}
-                        price={building.price}
-                        area={building.area}
-                        owner={building.owner}
+              Posts Section
+              <Grid container spacing={6} sx={{ marginTop: "-25px" }}>
+                {/* Posts Section */}
+                {posts.length > 0 ? (
+                  posts.map((post) => (
+                    <Grid item xs={12} md={6} xl={3} key={post.id}>
+                      <PostCard
+                        postId={post.id}
+                        image={post.image_url || homeDecor1}
+                        title={post.title}
+                        content={post.content}
+                        username={post.username}
                         onDeletePost={handleRefrech}
                         onUpdatePost={handleRefrech}
+                        action={{
+                          type: "internal",
+                          route: `/posts/${post.id}`,
+                          color: "info",
+                          label: "View Post",
+                        }}
                       />
                     </Grid>
                   ))
                 ) : (
-                  <div>No buildings found.</div>
+                  <Grid container justifyContent="center" sx={{ marginTop: "25px" }}>
+                    <Grid item>
+                      <MDTypography variant="h6" align="center" fullWidth>
+                        No Posts available
+                      </MDTypography>
+                    </Grid>
+                  </Grid>
                 )}
               </Grid>
+              <>
+                <br />
+              </>
             </MDBox>
+          </Card>
+          {/* Building section */}
+          {profile.role === "ROLE_PROPERTYOWNER" && (
+            <Card sx={{ marginTop: "30px" }}>
+              <MDBox p={2}>
+                Buildings Section
+                <Grid container spacing={6} sx={{ marginTop: "-25px" }}>
+                  {buildings.length > 0 ? (
+                    buildings.map((building) => (
+                      <Grid item xs={12} md={6} xl={3} key={building.id}>
+                        <BuildingCard
+                          buildingId={building.id}
+                          image={building.image_url || homeDecor1} // Replace with building image if available
+                          type={building.type}
+                          cityy={building.city}
+                          address={building.address}
+                          rooms={building.rooms}
+                          price={building.price}
+                          area={building.area}
+                          owner={building.owner}
+                          onDeletePost={handleRefrech}
+                          onUpdatePost={handleRefrech}
+                        />
+                      </Grid>
+                    ))
+                  ) : (
+                    <Grid
+                      container
+                      justifyContent="center"
+                      sx={{ marginTop: "25px", marginBottom: "30px" }}
+                    >
+                      <Grid item>
+                        <MDTypography variant="h6" align="center" fullWidth>
+                          No Buildings available
+                        </MDTypography>
+                      </Grid>
+                    </Grid>
+                  )}
+                </Grid>
+              </MDBox>
+            </Card>
           )}
         </>
       )}

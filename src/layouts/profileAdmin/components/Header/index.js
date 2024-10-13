@@ -11,6 +11,13 @@ import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Icon from "@mui/material/Icon";
+import Dialog from "@mui/material/Dialog"; // Import Dialog
+import DialogActions from "@mui/material/DialogActions"; // Import DialogActions
+import DialogContent from "@mui/material/DialogContent"; // Import DialogContent
+import DialogContentText from "@mui/material/DialogContentText"; // Import DialogContentText
+import DialogTitle from "@mui/material/DialogTitle"; // Import DialogTitle
+import Button from "@mui/material/Button"; // Import Button
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -30,7 +37,12 @@ function Header({ children, refresh }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [openDialog, setOpenDialog] = useState(false); // Dialog open state
+  const [requestLoading, setRequestLoading] = useState(false); // For tracking loading state during request
+  const [error, setError] = useState(null); // For tracking request error
+
   const navigate = useNavigate(); // Initialize useNavigate
+
   const fetchProfile = async () => {
     const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
     console.log("Token:", token); // Debug: Check if token is retrieved
@@ -90,10 +102,39 @@ function Header({ children, refresh }) {
 
   const handleSetTabValue = (event, newValue) => setTabValue(newValue);
 
-  const handleLogout = () => {
-    localStorage.removeItem("jwt-Token");
-    sessionStorage.removeItem("jwt-Token");
-    navigate("/authentication/sign-in"); // Redirect to login page
+  const handleOpenDialog = () => {
+    setError(null); // Clear previous errors
+    setOpenDialog(true); // Open confirmation dialog
+  };
+
+  const handleCloseDialog = () => {
+    if (!requestLoading) {
+      // Prevent closing while the request is in progress
+      setOpenDialog(false); // Close confirmation dialog
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setRequestLoading(true); // Set loading to true before request starts
+    setError(null); // Clear previous errors
+
+    try {
+      const response = await fetch(`/PI/resetPassword/${profile.email}`, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        console.log("Password reset request sent");
+        setOpenDialog(false); // Close dialog on success
+      } else {
+        throw new Error("Failed to reset password");
+      }
+    } catch (error) {
+      setError("Error resetting password. Please try again."); // Set error message
+      console.error("Error resetting password:", error);
+    } finally {
+      setRequestLoading(false); // Stop loading after the request finishes
+    }
   };
 
   if (loading) {
@@ -151,39 +192,15 @@ function Header({ children, refresh }) {
               )}
             </MDBox>
           </Grid>
-          <Grid item xs={12} md={6} lg={4} sx={{ ml: "auto" }}>
+          <Grid item xs={12} md={6} lg={2} sx={{ ml: "auto" }}>
             <AppBar position="static">
               <Tabs orientation={tabsOrientation} value={tabValue} onChange={handleSetTabValue}>
-                {/* <Tab
-                  label="App"
-                  icon={
-                    <Icon fontSize="small" sx={{ mt: -0.25 }}>
-                      home
-                    </Icon>
-                  }
-                />
                 <Tab
-                  label="Message"
+                  label="Reset Password"
+                  onClick={handleOpenDialog} // Show dialog on click
                   icon={
                     <Icon fontSize="small" sx={{ mt: -0.25 }}>
-                      email
-                    </Icon>
-                  }
-                />
-                <Tab
-                  label="Settings"
-                  icon={
-                    <Icon fontSize="small" sx={{ mt: -0.25 }}>
-                      settings
-                    </Icon>
-                  }
-                /> */}
-                <Tab
-                  label="Log Out"
-                  onClick={handleLogout} // Add onClick handler
-                  icon={
-                    <Icon fontSize="small" sx={{ mt: -0.25 }}>
-                      logout
+                      lock_reset
                     </Icon>
                   }
                 />
@@ -193,6 +210,36 @@ function Header({ children, refresh }) {
         </Grid>
         {children}
       </Card>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Reset Password</DialogTitle>
+        <DialogContent>
+          {requestLoading ? (
+            <MDBox display="flex" justifyContent="center" alignItems="center" height="100%">
+              <CircularProgress size={50} />
+            </MDBox> // Show loading spinner during request
+          ) : (
+            <DialogContentText>
+              {error
+                ? error // Show error message if request failed
+                : `An email will be sent to ${profile?.email} with your new password. Are you sure you want to continue ?`}
+            </DialogContentText>
+          )}
+        </DialogContent>
+        <DialogActions>
+          {!requestLoading && (
+            <>
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleResetPassword} color="primary" autoFocus>
+                Confirm
+              </Button>
+            </>
+          )}
+        </DialogActions>
+      </Dialog>
     </MDBox>
   );
 }

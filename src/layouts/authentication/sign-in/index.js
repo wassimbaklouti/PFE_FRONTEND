@@ -18,11 +18,13 @@ function Basic() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const navigate = useNavigate(); // Hook for navigation
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
   const handleSubmit = async (e) => {
+    setRequestError("");
     e.preventDefault();
     const data = { username, password };
 
@@ -68,7 +70,9 @@ function Basic() {
           console.error("Unknown role:", role);
         }
       } else {
-        console.error("Login failed");
+        const errorData = await response.json(); // Parse the response as JSON
+        setRequestError(errorData.message);
+        console.error("Error:", errorData.message);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -111,6 +115,13 @@ function Basic() {
           </Grid>
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
+          {requestError && (
+            <div style={{ textAlign: "center", marginBottom: "16px" }}>
+              <MDTypography color="error" variant="caption" style={{ fontSize: "1rem" }}>
+                {requestError}
+              </MDTypography>
+            </div>
+          )}
           <MDBox component="form" role="form" onSubmit={handleSubmit}>
             <MDBox mb={2}>
               <MDInput
@@ -148,17 +159,32 @@ function Basic() {
               </MDButton>
             </MDBox>
             <MDBox mt={3} mb={1} textAlign="center">
+              <MDBox>
+                <MDTypography variant="button" color="text">
+                  Don&apos;t have an account?{" "}
+                  <MDTypography
+                    component={Link}
+                    to="/authentication/sign-up"
+                    variant="button"
+                    color="info"
+                    fontWeight="medium"
+                    textGradient
+                  >
+                    Sign up
+                  </MDTypography>
+                </MDTypography>
+              </MDBox>
               <MDTypography variant="button" color="text">
-                Don&apos;t have an account?{" "}
+                Forgot your password?{" "}
                 <MDTypography
                   component={Link}
-                  to="/authentication/sign-up"
+                  to="/authentication/ResetPassword"
                   variant="button"
                   color="info"
                   fontWeight="medium"
                   textGradient
                 >
-                  Sign up
+                  Reset password
                 </MDTypography>
               </MDTypography>
             </MDBox>
