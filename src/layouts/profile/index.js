@@ -429,6 +429,7 @@ function Overview() {
         if (response.ok) {
           const data = await response.json();
           setProfile(data);
+          localStorage.setItem("profile-image", profile.profileImageUrl);
           triggerRefresh();
           setEditMode(false); // Exit edit mode after successful update
         } else {
@@ -690,7 +691,7 @@ function Overview() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      <DashboardNavbar refresh={refreshTriger} />
       <MDBox mb={2} />
       {loading ? (
         <MDBox
