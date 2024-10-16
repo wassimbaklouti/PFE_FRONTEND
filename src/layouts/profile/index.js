@@ -32,13 +32,7 @@ import PlatformSettings from "layouts/profile/components/PlatformSettings";
 
 // Images
 import homeDecor1 from "assets/images/home-decor-1.jpg";
-import homeDecor2 from "assets/images/home-decor-2.jpg";
-import homeDecor3 from "assets/images/home-decor-3.jpg";
-import homeDecor4 from "assets/images/home-decor-4.jpeg";
-import team1 from "assets/images/team-1.jpg";
-import team2 from "assets/images/team-2.jpg";
-import team3 from "assets/images/team-3.jpg";
-import team4 from "assets/images/team-4.jpg";
+import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/material";
 
 function Overview() {
   const [profile, setProfile] = useState(null);
@@ -996,16 +990,22 @@ function Overview() {
                     {activeForm === "building" && (
                       <MDBox component="form" onSubmit={handleNewBuildingSubmit} p={2}>
                         <MDTypography variant="h5">Add New Building</MDTypography>
-                        <TextField
-                          label="Type"
-                          name="type"
-                          value={newBuildingData.type}
-                          onChange={handleNewBuildingChange}
-                          fullWidth
-                          margin="normal"
-                          error={!!errors.type}
-                          helperText={errors.type}
-                        />
+                        {/* Liste déroulante pour le type de building */}
+                        <FormControl fullWidth margin="normal" error={!!errors.type}>
+                          <InputLabel>Type</InputLabel>
+                          <Select
+                            label="Type"
+                            name="type"
+                            value={newBuildingData.type}
+                            onChange={handleNewBuildingChange}
+                          >
+                            <MenuItem value="appartement">Appartement</MenuItem>
+                            <MenuItem value="flat">Flat</MenuItem>
+                            <MenuItem value="villa">Villa</MenuItem>
+                            <MenuItem value="house">House</MenuItem>
+                          </Select>
+                          {errors.type && <FormHelperText>{errors.type}</FormHelperText>}
+                        </FormControl>
                         <Autocomplete
                           options={cities}
                           getOptionLabel={(option) => option}

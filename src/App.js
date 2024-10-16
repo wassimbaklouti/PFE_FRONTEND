@@ -117,12 +117,7 @@ export default function App() {
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {layout === "dashboard" && (
-          <>
-            <Configurator />
-            {configsButton}
-          </>
-        )}
+        {layout === "dashboard" && <> </>}
         {layout === "vr" && <Configurator />}
         <MDBox sx={{ width: "100%" }}>
           <Routes>
@@ -135,12 +130,7 @@ export default function App() {
   ) : (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
-      {layout === "dashboard" && (
-        <>
-          <Configurator />
-          {configsButton}
-        </>
-      )}
+      {layout === "dashboard" && <></>}
       {layout === "vr" && <Configurator />}
       <MDBox sx={{ width: "100%" }}>
         <Routes>

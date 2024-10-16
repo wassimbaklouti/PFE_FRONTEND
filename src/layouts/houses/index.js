@@ -172,9 +172,10 @@ function Houses() {
                 }}
               >
                 <MenuItem value="">All</MenuItem>
-                <MenuItem value="maison">Maison</MenuItem>
+                <MenuItem value="house">House</MenuItem>
                 <MenuItem value="appartement">Appartement</MenuItem>
-                <MenuItem value="villa">Villa</MenuItem>
+                <MenuItem value="flat">Flat</MenuItem>
+                <MenuItem value="villa">villa</MenuItem>
               </TextField>
             </Grid>
 
