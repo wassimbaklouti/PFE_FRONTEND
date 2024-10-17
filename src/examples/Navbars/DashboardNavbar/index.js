@@ -17,7 +17,7 @@ import {
   setOpenConfigurator,
 } from "context";
 
-function DashboardNavbar({ absolute, light, isMini, refresh }) {
+function DashboardNavbar({ absolute, light, isMini, refresh, imagee }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentNavbar, fixedNavbar, darkMode } = controller;
@@ -25,7 +25,7 @@ function DashboardNavbar({ absolute, light, isMini, refresh }) {
   const location = useLocation();
   const token = sessionStorage.getItem("jwt-Token") || localStorage.getItem("jwt-Token");
   // const profileimage = localStorage.getItem("profile-image");
-  const [profileimage, setProfileimage] = useState(localStorage.getItem("profile-image") || "");
+  const [profileimage, setProfileimage] = useState("");
   const [searchTerm, setSearchTerm] = useState(""); // État pour la recherche
   const [suggestions, setSuggestions] = useState([]); // État pour les suggestions d'autocomplétion
   const [isFocused, setIsFocused] = useState(false);
@@ -40,10 +40,23 @@ function DashboardNavbar({ absolute, light, isMini, refresh }) {
     setBlurTimer(timer); // Save the timer ID
   };
   useEffect(() => {
-    const storedImageUrl = localStorage.getItem("profile-image");
-    const timestamp = new Date().getTime(); // Use current time as a unique value
-    const updatedUrl = storedImageUrl ? `${storedImageUrl}?t=${timestamp}` : "";
-    setProfileimage(updatedUrl);
+    const updateProfileImage = () => {
+      if (imagee) {
+        const timestamp = new Date().getTime();
+        const updatedUrl = imagee ? `${imagee}?t=${timestamp}` : "";
+        setProfileimage(updatedUrl);
+        // setProfileimage(imagee);
+        console.log("imageeeee mennna ", imagee);
+      } else {
+        console.log("imageeeee");
+        const storedImageUrl = localStorage.getItem("profile-image");
+        const timestamp = new Date().getTime();
+        const updatedUrl = storedImageUrl ? `${storedImageUrl}?t=${timestamp}` : "";
+        setProfileimage(updatedUrl);
+      }
+    };
+
+    updateProfileImage();
   }, [refresh]);
 
   useEffect(() => {
@@ -428,7 +441,8 @@ DashboardNavbar.propTypes = {
   absolute: PropTypes.bool,
   light: PropTypes.bool,
   isMini: PropTypes.bool,
-  refresh: PropTypes.bool,
+  refresh: PropTypes.any,
+  imagee: PropTypes.any,
 };
 
 export default DashboardNavbar;

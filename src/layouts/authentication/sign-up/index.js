@@ -18,6 +18,7 @@ import CoverLayout from "layouts/authentication/components/CoverLayout";
 import bgImage from "assets/images/sign_up_image.jpg";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const GEO_NAMES_USERNAME = "bakloutiwassim";
 
@@ -39,6 +40,7 @@ function Cover() {
   const [errors, setErrors] = useState({});
   const [cities, setCities] = useState([]);
   const [requestError, setRequestError] = useState("");
+  const [loading, setLoading] = useState(false); // Added loading state
 
   const navigate = useNavigate();
 
@@ -113,6 +115,8 @@ function Cover() {
 
     if (!validateForm()) return; // Stop form submission if validation fails
 
+    setLoading(true); // Start loading indicator
+
     let role;
     if (formType === "user") {
       role = "ROLE_USER";
@@ -150,6 +154,8 @@ function Cover() {
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setLoading(false); // Stop loading indicator
     }
   };
 
@@ -232,6 +238,7 @@ function Cover() {
                   onChange={onChangeInput}
                   value={newUser.firstName}
                   error={!!errors.firstName}
+                  disabled={loading}
                 />
                 {errors.firstName && (
                   <MDTypography color="error" variant="caption">
@@ -250,6 +257,7 @@ function Cover() {
                   onChange={onChangeInput}
                   value={newUser.lastName}
                   error={!!errors.lastName}
+                  disabled={loading}
                 />
                 {errors.lastName && (
                   <MDTypography color="error" variant="caption">
@@ -268,6 +276,7 @@ function Cover() {
                   onChange={onChangeInput}
                   value={newUser.username}
                   error={!!errors.username}
+                  disabled={loading}
                 />
                 {errors.username && (
                   <MDTypography color="error" variant="caption">
@@ -286,6 +295,7 @@ function Cover() {
                   onChange={onChangeInput}
                   value={newUser.email}
                   error={!!errors.email}
+                  disabled={loading}
                 />
                 {errors.email && (
                   <MDTypography color="error" variant="caption">
@@ -304,6 +314,7 @@ function Cover() {
                   onChange={onChangeInput}
                   value={newUser.phoneNumber}
                   error={!!errors.phoneNumber}
+                  disabled={loading}
                 />
                 {errors.phoneNumber && (
                   <MDTypography color="error" variant="caption">
@@ -313,7 +324,7 @@ function Cover() {
               </MDBox>
 
               <MDBox mb={2}>
-                <FormControl variant="standard" fullWidth>
+                <FormControl variant="standard" fullWidth disabled={loading}>
                   <InputLabel>City</InputLabel>
                   <Select
                     label="City"
@@ -321,6 +332,7 @@ function Cover() {
                     onChange={onChangeInput}
                     value={newUser.city}
                     error={!!errors.city}
+                    disabled={loading}
                   >
                     {cities.map((cityName) => (
                       <MenuItem key={cityName} value={cityName}>
@@ -338,7 +350,7 @@ function Cover() {
 
               {formType === "handyman" && (
                 <MDBox mb={2}>
-                  <FormControl variant="standard" fullWidth>
+                  <FormControl variant="standard" fullWidth disabled={loading}>
                     <InputLabel>Expertise</InputLabel>
                     <Select
                       label="Expertise"
@@ -346,6 +358,7 @@ function Cover() {
                       onChange={onChangeInput}
                       value={newUser.expertise}
                       error={!!errors.expertise}
+                      disabled={loading}
                     >
                       <MenuItem value="electrician">Electricity</MenuItem>
                       <MenuItem value="plumber">Plumbing</MenuItem>
@@ -354,10 +367,10 @@ function Cover() {
                       <MenuItem value="houseKeeper">Housekeeping</MenuItem>
                       <MenuItem value="refrigerationTechnician">Refrigeration Services</MenuItem>
                       <MenuItem value="homeApplianceTechnician">Home Appliance Repair</MenuItem>
-                      <MenuItem value="mason">masonry</MenuItem>
-                      <MenuItem value="carpenter">carpentry</MenuItem>
-                      <MenuItem value="welder">welding</MenuItem>
-                      <MenuItem value="sosDriver">SOS Serice</MenuItem>
+                      <MenuItem value="mason">Masonry</MenuItem>
+                      <MenuItem value="carpenter">Carpentry</MenuItem>
+                      <MenuItem value="welder">Welding</MenuItem>
+                      <MenuItem value="sosDriver">SOS Service</MenuItem>
                     </Select>
                     {errors.expertise && (
                       <MDTypography color="error" variant="caption">
@@ -376,6 +389,7 @@ function Cover() {
                         onChange={onChangeInput}
                         value={newUser.dateDeb}
                         error={!!errors.dateDeb}
+                        disabled={loading}
                       />
                       {errors.dateDeb && (
                         <MDTypography color="error" variant="caption">
@@ -394,6 +408,7 @@ function Cover() {
                         onChange={onChangeInput}
                         value={newUser.dateFin}
                         error={!!errors.dateFin}
+                        disabled={loading}
                       />
                       {errors.dateFin && (
                         <MDTypography color="error" variant="caption">
@@ -406,9 +421,20 @@ function Cover() {
               )}
 
               <MDBox mt={4} mb={1}>
-                <MDButton variant="gradient" color="info" type="submit" fullWidth>
-                  Sign Up
+                <MDButton
+                  variant="gradient"
+                  color="info"
+                  type="submit"
+                  fullWidth
+                  disabled={loading}
+                >
+                  {loading ? "Signing Up..." : "Sign Up"}
                 </MDButton>
+                {loading && (
+                  <MDBox display="flex" justifyContent="center" mt={2}>
+                    <CircularProgress />
+                  </MDBox>
+                )}
               </MDBox>
             </MDBox>
           </MDBox>
