@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import Card from "@mui/material/Card";
-import Switch from "@mui/material/Switch";
 import Grid from "@mui/material/Grid";
 import MuiLink from "@mui/material/Link";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
@@ -17,16 +17,16 @@ import bgImage from "assets/images/sign_in_image.jpg";
 function Basic() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [requestError, setRequestError] = useState("");
+  const [loading, setLoading] = useState(false); // Added loading state
   const navigate = useNavigate(); // Hook for navigation
-
-  const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
   const handleSubmit = async (e) => {
     setRequestError("");
     e.preventDefault();
     const data = { username, password };
+
+    setLoading(true); // Start loading indicator
 
     try {
       const response = await fetch("/PI/login", {
@@ -43,21 +43,14 @@ function Basic() {
         const role = result.role; // Assuming the role is returned in the response
         console.log("role signin ", role);
 
-        if (rememberMe) {
-          sessionStorage.clear();
-          localStorage.clear();
-          localStorage.setItem("role", role);
-          localStorage.setItem("jwt-Token", token);
-          localStorage.setItem("connected-user", JSON.stringify(result));
-          localStorage.setItem("profile-image", result.profileImageUrl);
-        } else {
-          localStorage.clear();
-          sessionStorage.clear();
-          sessionStorage.setItem("jwt-Token", token);
-          localStorage.setItem("role", role);
-          localStorage.setItem("profile-image", result.profileImageUrl);
-          localStorage.setItem("connected-user", JSON.stringify(result));
-        }
+        // Store token and user info in sessionStorage and localStorage
+        sessionStorage.clear();
+        localStorage.clear();
+        sessionStorage.setItem("jwt-Token", token);
+        sessionStorage.setItem("connected-user", JSON.stringify(result));
+        localStorage.setItem("connected-user", JSON.stringify(result));
+        localStorage.setItem("role", role);
+        localStorage.setItem("profile-image", result.profileImageUrl);
 
         // Role-based redirection
         if (role === "ROLE_PROPERTYOWNER" || role === "ROLE_HANDYMAN") {
@@ -76,6 +69,8 @@ function Basic() {
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setLoading(false); // Stop loading indicator
     }
   };
 
@@ -118,6 +113,7 @@ function Basic() {
                 fullWidth
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                disabled={loading} // Disable input when loading
               />
             </MDBox>
             <MDBox mb={2}>
@@ -127,13 +123,26 @@ function Basic() {
                 fullWidth
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading} // Disable input when loading
               />
             </MDBox>
-            <MDBox mt={4} mb={1}>
-              <MDButton type="submit" variant="gradient" color="info" fullWidth>
-                sign in
+            {/* Removed Remember Me switch */}
+            <MDBox mt={4} mb={1} position="relative">
+              <MDButton
+                type="submit"
+                variant="gradient"
+                color="info"
+                fullWidth
+                disabled={loading} // Disable button when loading
+              >
+                {loading ? "Signing in..." : "Sign in"}
               </MDButton>
             </MDBox>
+            {loading && (
+              <MDBox display="flex" justifyContent="center" mt={2}>
+                <CircularProgress size={24} color="info" />
+              </MDBox>
+            )}
             <MDBox mt={3} mb={1} textAlign="center">
               <MDBox>
                 <MDTypography variant="button" color="text">
