@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios"; // You'll use axios for making HTTP requests
 import PropTypes from "prop-types";
+import Icon from "@mui/material/Icon";
 import {
   Card,
   CardMedia,
@@ -23,6 +24,7 @@ function PostCard({ postId, image, title, content, username, onDeletePost, onUpd
   const [updatedTitle, setUpdatedTitle] = useState(title);
   const [originalTitle, setOriginalTitle] = useState(title);
   const [updatedContent, setUpdatedContent] = useState(content);
+  const fileInputRef = useRef(null);
   const [originalContent, setOriginalContent] = useState(content);
   const [imageFile, setImageFile] = useState(null); // For storing the image file
   const [errors, setErrors] = useState({
@@ -53,6 +55,9 @@ function PostCard({ postId, image, title, content, username, onDeletePost, onUpd
     setOpenDialog(false);
   };
 
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
   // Function to handle updating the post
   const handleUpdate = async () => {
     try {
@@ -131,10 +136,10 @@ function PostCard({ postId, image, title, content, username, onDeletePost, onUpd
           </MDTypography>
         </MDBox>
         <MDBox display="flex" justifyContent="space-between" alignItems="center">
-          <MDButton variant="outlined" size="small" color="primary" onClick={handleClickOpen}>
+          <MDButton variant="gradient" size="small" color="warning" onClick={handleClickOpen}>
             Update Post
           </MDButton>
-          <MDButton variant="outlined" size="small" color="error" onClick={handleDelete}>
+          <MDButton variant="gradient" size="small" color="error" onClick={handleDelete}>
             Delete Post
           </MDButton>
         </MDBox>
@@ -171,8 +176,27 @@ function PostCard({ postId, image, title, content, username, onDeletePost, onUpd
             type="file"
             accept="image/*"
             onChange={(e) => setImageFile(e.target.files[0])}
-            style={{ marginTop: "1rem" }}
+            // style={{ marginTop: "1rem" }}
+            style={{ display: "none" }}
+            ref={fileInputRef}
           />
+          <MDButton
+            variant="contained"
+            color="primary"
+            startIcon={<Icon>upload</Icon>}
+            onClick={handleButtonClick}
+            fullWidth
+            style={{
+              margin: "16px 0",
+              backgroundColor: "#1976d2",
+              color: "#fff",
+              padding: "12px 24px",
+              fontSize: "12px",
+              // fontWeight: "bold",
+            }}
+          >
+            Upload Image
+          </MDButton>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
@@ -10,6 +10,7 @@ import Card from "@mui/material/Card";
 import MasterCard from "examples/Cards/MasterCard";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Icon from "@mui/material/Icon";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 // Material Dashboard 2 React components
@@ -36,9 +37,13 @@ import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/
 
 function Overview() {
   const [profile, setProfile] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState("");
   const [connectedUser, setConnectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requestError, setRequestError] = useState("");
+  const fileInputRef = useRef(null);
+  const fileInputRef2 = useRef(null);
+  const fileInputRef3 = useRef(null);
   const [errors, setErrors] = useState({
     title: "",
     content: "",
@@ -134,6 +139,10 @@ function Overview() {
   };
   const handleImageChange = (e) => {
     setFormData({ ...formData, profileImage: e.target.files[0] });
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFileName(file.name);
+    }
     // console.log("saleeeeem ", userUpdated);
   };
   const handlePostImageChange = (e) => {
@@ -326,6 +335,15 @@ function Overview() {
     setEditMode(true);
   };
 
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
+  const handleButtonClick2 = () => {
+    fileInputRef2.current.click();
+  };
+  const handleButtonClick3 = () => {
+    fileInputRef3.current.click();
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -823,16 +841,28 @@ function Overview() {
                           )}
                         />
                         <MDBox mt={2} mb={2}>
+                          {/* Hidden file input */}
+                          <input
+                            accept="image/*"
+                            type="file"
+                            name="profileImage"
+                            ref={fileInputRef3}
+                            style={{ display: "none" }}
+                            onChange={handleImageChange}
+                          />
+                          {/* TextField acting as a trigger */}
                           <TextField
                             margin="dense"
                             name="profileImage"
                             label="Profile Image"
-                            type="file"
+                            type="text"
                             fullWidth
                             InputLabelProps={{
                               shrink: true,
                             }}
-                            onChange={handleImageChange}
+                            value={selectedFileName}
+                            onClick={handleButtonClick3}
+                            readOnly
                           />
                         </MDBox>
                         <MDButton
@@ -916,8 +946,27 @@ function Overview() {
                           accept="image/*"
                           type="file"
                           onChange={handleImageFileChange}
-                          style={{ margin: "16px 0" }}
+                          // style={{ margin: "16px 0" }}
+                          style={{ display: "none" }}
+                          ref={fileInputRef2}
                         />
+                        <MDButton
+                          variant="contained"
+                          color="primary"
+                          startIcon={<Icon>upload</Icon>}
+                          onClick={handleButtonClick2}
+                          fullWidth
+                          style={{
+                            margin: "16px 0",
+                            backgroundColor: "#1976d2",
+                            color: "#fff",
+                            padding: "12px 24px",
+                            fontSize: "12px",
+                            // fontWeight: "bold",
+                          }}
+                        >
+                          Upload Image
+                        </MDButton>
                         <MDButton type="submit" variant="gradient" color="success" fullWidth>
                           Add Post
                         </MDButton>
@@ -984,8 +1033,28 @@ function Overview() {
                           accept="image/*"
                           type="file"
                           onChange={handleImageFileChange}
-                          style={{ margin: "16px 0" }}
+                          // style={{ margin: "16px 0" }}
+                          style={{ display: "none" }}
+                          ref={fileInputRef2}
                         />
+                        <MDButton
+                          variant="contained"
+                          color="primary"
+                          startIcon={<Icon>upload</Icon>}
+                          onClick={handleButtonClick2}
+                          fullWidth
+                          // fullWidth
+                          style={{
+                            margin: "16px 0",
+                            backgroundColor: "#1976d2",
+                            color: "#fff",
+                            padding: "12px 24px",
+                            fontSize: "12px",
+                            // fontWeight: "bold",
+                          }}
+                        >
+                          Upload Image
+                        </MDButton>
                         <MDButton type="submit" variant="gradient" color="success" fullWidth>
                           Add Post
                         </MDButton>
@@ -996,7 +1065,20 @@ function Overview() {
                       <MDBox component="form" onSubmit={handleNewBuildingSubmit} p={2}>
                         <MDTypography variant="h5">Add New Building</MDTypography>
                         {/* Liste déroulante pour le type de building */}
-                        <FormControl fullWidth margin="normal" error={!!errors.type}>
+                        <FormControl
+                          fullWidth
+                          margin="normal"
+                          error={!!errors.type}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              height: "44px",
+                              borderRadius: "5px",
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#d2d6da",
+                            },
+                          }}
+                        >
                           <InputLabel>Type</InputLabel>
                           <Select
                             label="Type"
@@ -1076,8 +1158,27 @@ function Overview() {
                           accept="image/*"
                           type="file"
                           onChange={handleBuildingImageFileChange}
-                          style={{ margin: "16px 0" }}
+                          // style={{ margin: "16px 0" }}
+                          style={{ display: "none" }}
+                          ref={fileInputRef}
                         />
+                        <MDButton
+                          variant="contained"
+                          color="primary"
+                          startIcon={<Icon>upload</Icon>}
+                          onClick={handleButtonClick}
+                          fullWidth
+                          style={{
+                            margin: "16px 0",
+                            backgroundColor: "#1976d2",
+                            color: "#fff",
+                            padding: "12px 24px",
+                            fontSize: "12px",
+                            // fontWeight: "bold",
+                          }}
+                        >
+                          Upload Image
+                        </MDButton>
                         <MDButton type="submit" variant="gradient" color="success" fullWidth>
                           Add Building
                         </MDButton>

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios"; // You'll use axios for making HTTP requests
 import PropTypes from "prop-types";
+import Icon from "@mui/material/Icon";
 import {
   Card,
   CardMedia,
@@ -47,6 +48,7 @@ function BuildingCard({
   const [originalArea, setOriginalArea] = useState(area);
   const [ownerDetails, setOwnerDetails] = useState(owner); // Store the owner details
   const [cities, setCities] = useState([]);
+  const fileInputRef = useRef(null);
 
   const fetchCities = async () => {
     try {
@@ -69,6 +71,9 @@ function BuildingCard({
     setUpdatedCity(newValue);
   };
 
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
+  };
   const handleBuildingImageFileChange = (e) => {
     const file = e.target.files[0];
     setUpdatedImageFile(file);
@@ -244,10 +249,10 @@ function BuildingCard({
           </MDTypography>
         </MDBox>
         <MDBox display="flex" justifyContent="space-between" alignItems="center">
-          <MDButton variant="outlined" size="small" color="primary" onClick={handleClickOpen}>
+          <MDButton variant="gradient" size="small" color="warning" onClick={handleClickOpen}>
             Update Building
           </MDButton>
-          <MDButton variant="outlined" size="small" color="error" onClick={handleDelete}>
+          <MDButton variant="gradient" size="small" color="error" onClick={handleDelete}>
             Delete Building
           </MDButton>
         </MDBox>
@@ -320,8 +325,27 @@ function BuildingCard({
             accept="image/*"
             type="file"
             onChange={handleBuildingImageFileChange}
-            style={{ margin: "16px 0" }}
+            // style={{ margin: "16px 0" }}
+            style={{ display: "none" }}
+            ref={fileInputRef}
           />
+          <MDButton
+            variant="contained"
+            color="primary"
+            startIcon={<Icon>upload</Icon>}
+            onClick={handleButtonClick}
+            fullWidth
+            style={{
+              margin: "16px 0",
+              backgroundColor: "#1976d2",
+              color: "#fff",
+              padding: "12px 24px",
+              fontSize: "12px",
+              // fontWeight: "bold",
+            }}
+          >
+            Upload Image
+          </MDButton>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary">
